@@ -1,0 +1,664 @@
+/* ══════════════════════════════════════════════════════════════════
+   MINERVA — Historia del olivar · Design System
+   Paleta: mármol/pergamino · oro de Minerva · verde olivo · terracota
+   ══════════════════════════════════════════════════════════════════ */
+:root{
+  /* Chrome palette + typographic voice — 2026-09-06, taken from the approved cover
+     07_temp/portadas_visores_2026-09/minerva/V5_mancha-de-aceite.html:
+       paper #f2eee1 · olive ink #28311d · leaf #4f7a2a · dark olive #3c4a1c ·
+       amphora terracotta #b05620 · hairlines = ink at 22%/44% ·
+       Bodoni Moda (display) + Alegreya Sans (text).
+     Reading of the system: terracotta = interaction (hover / active / focus),
+     leaf = quiet marks and rules, oil-gold = the OIL, i.e. data (the cover paints
+     its stain in rgb(150,106,20)), so --gold survives only on marks that carry a
+     value: bi-ribbon, rank bars, magnitude bars, the "valor" chip.
+     The data ramps live in js/utils.js and js/views/* (SEQ_COLORS / DIV_COLORS /
+     AEGEAN_COLORS / RAMP / CONF_COL). They WERE revised on 2026-09-06, at the
+     author's request and against measurements: see "Las escalas de mapa SI se
+     tocan" in CLAUDE.md before touching one. The map furniture below is part of
+     that revision and has to stay in step with js/utils.js. */
+  /* parchment / marble stage */
+  --cream:#F2EEE1; --cream-2:#E7E2CF; --cream-3:#DBD5BC;
+  --paper:#F9F6EC;
+  /* ink — the cover's olive ink, not the old brown */
+  --ink:#28311D; --ink-2:#4C5738; --ink-3:#5F6650;
+  /* gold — Minerva / olive oil */
+  --gold:#C9A227; --gold-lt:#E4C56A; --gold-pale:#F0DD9C; --gold-dk:#9A7B18;
+  /* olive */
+  --olive:#4F7A2A; --olive-dk:#3C4A1C; --olive-lt:#8CA35A; --olive-deep:#243318;
+  /* accents — amphora terracotta from the cover */
+  --terra:#B05620; --terra-dk:#8A3F16; --aegean:#1E5E82; --aegean-lt:#2E7BA6;
+  --purpura:#6A2E6B; --wine:#7A2A3A;
+  /* mobiliario del mapa — los mismos valores que js/utils.js (2026-09-06):
+     cálido = un valor medido, gris neutro = no es un valor. */
+  --land-bg:#DCD0BB;         /* tierra fuera del conjunto de datos */
+  --map-nodata:#BEBBB2;      /* dentro del conjunto, sin valor este año */
+  --map-zero:#F7EEC8;        /* medido, y no hay olivar */
+  --land-stroke:rgba(120,96,54,.28);
+  /* structural */
+  --border:#CDC7AC; --border-lt:#DDD8C0; --border-dk:#B3AC8C;
+  --rail:#1C2A17;            /* deep olive-night rail */
+  --rail-2:#233318;
+  --rail-ink:rgba(242,238,225,0.90);
+  --rail-ink-2:rgba(242,238,225,0.62);
+  --rail-line:rgba(242,238,225,0.16);
+  /* type */
+  --ff:'Alegreya Sans','Gill Sans','Gill Sans MT','Trebuchet MS',Calibri,system-ui,sans-serif;
+  --serif:'Bodoni Moda','Bodoni 72',Didot,'Bodoni MT',Georgia,serif;
+  /* Alegreya Sans runs one notch smaller than Inter at the same px. */
+  --fs-xs:10.5px; --fs-sm:11.5px; --fs-base:13.5px; --fs-md:14.5px; --fs-lg:16.5px;
+  --sidebar-w:86px; --topbar-h:48px; --timeline-h:66px; --footer-h:28px; --rail-w:314px;
+  --tr:.22s ease; --tr-f:.12s ease;
+  --shadow:0 2px 10px rgba(60,44,18,.10),0 8px 30px rgba(60,44,18,.08);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%; height:100dvh}
+body{
+  font-family:var(--ff); background:var(--cream); color:var(--ink);
+  font-size:var(--fs-base); line-height:1.5; overflow:hidden;
+}
+button{font-family:inherit}
+::selection{background:rgba(176,86,32,.20)}
+/* Foco de teclado visible en todo el cromo, con el acento de la portada
+   (la portada usa outline:2px solid var(--anfora); outline-offset:2px). */
+:focus-visible{outline:2px solid var(--terra); outline-offset:2px}
+.sel:focus-visible,.ev-search:focus-visible,.footer-actions button:focus-visible,
+.pill:focus-visible,.ev-tab:focus-visible,.tb-icon:focus-visible,.tl-play:focus-visible,
+.tl-speed:focus-visible,.rail-toggle:focus-visible,.about-close:focus-visible,
+.tt-close:focus-visible,
+.ev-d-close:focus-visible,.rail-sheet-close:focus-visible{
+  outline:2px solid var(--terra); outline-offset:2px}
+.sb-btn:focus-visible,.sb-info:focus-visible{outline:2px solid var(--terra); outline-offset:-3px}
+.hidden{display:none!important}
+
+/* ════════════════ APP SHELL ════════════════ */
+#app{display:flex; height:100vh; height:100dvh; opacity:0; transition:opacity .5s ease}
+#app.ready{opacity:1}
+
+.sidebar{width:var(--sidebar-w); flex-shrink:0; background:linear-gradient(180deg,var(--rail),var(--rail-2));
+  display:flex; flex-direction:column; align-items:stretch; z-index:50; box-shadow:2px 0 12px rgba(0,0,0,.14)}
+.sb-brand{padding:16px 6px 12px; text-align:center; border-bottom:1px solid var(--rail-line)}
+.sb-brand .m{font-family:var(--serif); font-size:20px; font-weight:500; color:var(--cream); line-height:1;
+  letter-spacing:.01em}
+.sb-brand .o{font-size:8.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--rail-ink-2); margin-top:5px}
+.sb-nav{flex:1; display:flex; flex-direction:column; padding-top:6px}
+.sb-btn{position:relative; background:none; border:0; color:var(--rail-ink-2); cursor:pointer;
+  padding:15px 6px 13px; display:flex; flex-direction:column; align-items:center; gap:7px; transition:var(--tr)}
+.sb-btn svg{width:25px; height:25px}
+.sb-btn .lbl{font-size:9px; font-weight:600; letter-spacing:.4px; text-transform:uppercase; text-align:center; line-height:1.15}
+.sb-btn:hover{color:var(--cream); background:rgba(242,238,225,.07)}
+.sb-btn.on{color:var(--cream); background:rgba(242,238,225,.11)}
+.sb-btn.on::before{content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--terra)}
+.sb-foot{padding:10px 6px; border-top:1px solid var(--rail-line)}
+.sb-info{width:100%; background:none; border:0; color:var(--rail-ink-2); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 0; transition:var(--tr)}
+.sb-info svg{width:20px; height:20px}
+.sb-info .lbl{font-size:8px; letter-spacing:.4px; text-transform:uppercase}
+.sb-info:hover{color:var(--cream)}
+
+.main{flex:1; display:flex; flex-direction:column; min-width:0; position:relative}
+
+/* topbar / query bar */
+/* La cabecera crece si sus controles necesitan dos filas: con la altura fija en
+   48 px, la segunda fila (Atlas: «lineal / log»; Comercio: «Valor $ / Volumen t»)
+   se derramaba sobre el mapa y la primera quedaba cortada por arriba. */
+.topbar{min-height:var(--topbar-h); flex-shrink:0; display:flex; align-items:center; gap:12px;
+  padding:6px 18px; background:var(--paper); border-bottom:1px solid var(--border-lt); z-index:40}
+.tb-title{font-family:var(--serif); font-size:18px; font-weight:500; color:var(--ink); white-space:nowrap;
+  letter-spacing:-.005em}
+.tb-title .sub{font-family:var(--ff); font-size:11px; font-weight:500; color:var(--ink-3); margin-left:8px;
+  letter-spacing:.3px; text-transform:none}
+.tb-sep{width:1px; height:22px; background:var(--border)}
+.tb-controls{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.tb-spacer{flex:1}
+.pillset{display:inline-flex; background:var(--cream-2); border:1px solid var(--border-lt); border-radius:0; padding:2px; gap:2px}
+.pill{background:none; border:0; padding:5px 11px; font-size:11px; font-weight:600; color:var(--ink-2);
+  cursor:pointer; border-radius:0; transition:var(--tr-f); white-space:nowrap; letter-spacing:.2px}
+.pill:hover{color:var(--ink); background:rgba(176,86,32,.12)}
+.pill.on{background:var(--rail); color:var(--cream); box-shadow:inset 0 1px 2px rgba(0,0,0,.2)}
+.sel{appearance:none; background:var(--cream-2); border:1px solid var(--border-lt); border-radius:0;
+  padding:6px 30px 6px 12px; font:inherit; font-size:12px; font-weight:600; color:var(--ink); cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235F5136'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 8px center; background-size:16px}
+.sel:focus{border-color:var(--terra)}
+.tb-icon{width:32px; height:32px; display:grid; place-items:center; background:var(--cream-2);
+  border:1px solid var(--border-lt); border-radius:0; color:var(--ink-2); cursor:pointer; transition:var(--tr)}
+.tb-icon:hover{color:var(--terra-dk); border-color:var(--terra)}
+.tb-icon svg{width:18px; height:18px}
+
+/* stage */
+.stage{flex:1; position:relative; overflow:hidden; background:
+  radial-gradient(1100px 700px at 50% 0%, #FBF6EA, var(--cream) 70%)}
+.view{position:absolute; inset:0; display:none; flex-direction:column}
+.view.on{display:flex}
+
+/* map */
+.map-wrap{flex:1; position:relative; overflow:hidden}
+.map-svg{width:100%; height:100%; display:block; cursor:grab}
+.map-svg:active{cursor:grabbing}
+/* Marca de agua del año: DECORACIÓN declarada, no información, y por eso va
+   con aria-hidden="true" en index.html y se queda en tinta al 18 % (1,39:1),
+   por debajo del 3:1 que pediría un texto de este cuerpo.
+   El año no depende de ella: en escritorio se lee dos veces más en la misma
+   pantalla — el rótulo de la línea de tiempo (#tl-year, var(--ink), 26 px,
+   12,6:1) y el pie dentro del lienzo (.map-caption strong, 16 px, 11,7:1) —,
+   y en teléfono, donde .map-caption se oculta (media query de más abajo),
+   queda #tl-year a 22 px y 12,6:1. Subir esta marca a 3:1 pondría un segundo
+   titular a competir con el mapa para repetir un dato ya legible.
+   Si algún día el año deja de mostrarse en la línea de tiempo, esta regla
+   pasa a ser el único portador del dato y hay que llevarla a 3:1. */
+.map-year{position:absolute; top:14px; right:22px; font-family:var(--serif); font-size:52px; font-weight:600;
+  color:rgba(40,49,29,.18); pointer-events:none; letter-spacing:.02em}
+.map-note{position:absolute; left:20px; top:16px; max-width:280px; font-size:11px; color:var(--ink-3); pointer-events:none}
+/* Título, año y fuente dentro del lienzo: una captura del mapa tiene que
+   entenderse sola, fuera del atlas. */
+.map-caption{position:absolute; left:20px; top:16px; z-index:4; max-width:min(56ch,calc(100% - 190px));
+  display:flex; flex-direction:column; gap:2px; pointer-events:none;
+  border-left:3px solid var(--terra); padding-left:9px}
+.map-caption[hidden]{display:none}
+.map-caption strong{font-family:var(--serif); font-size:16px; font-weight:500; color:var(--ink); line-height:1.2}
+.map-caption span{font-size:10px; color:var(--ink-3); line-height:1.25}
+
+/* Confirmación de una descarga (o de por qué no la hay). */
+.export-toast{position:fixed; left:50%; bottom:26px; transform:translate(-50%,12px); z-index:900;
+  max-width:min(92vw,460px); padding:11px 16px; background:var(--rail); color:var(--cream);
+  font-size:12.5px; line-height:1.35; box-shadow:0 12px 34px rgba(0,0,0,.3);
+  opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease}
+.export-toast.visible{opacity:1; transform:translate(-50%,0)}
+.border-mesh{fill:none; stroke:var(--land-stroke,rgba(120,96,54,.28)); stroke-width:.6; stroke-linejoin:round}
+.outline-mesh{fill:none; stroke:rgba(120,96,54,.4); stroke-width:.4}
+.region{cursor:pointer; stroke-linejoin:round; transition:fill .35s ease}
+.region.sel{stroke:var(--ink)!important; stroke-width:1.6!important}
+.region-bg{fill:var(--land-bg,#DCD0BB); stroke:rgba(120,96,54,.22); stroke-width:.4}
+/* Celda estimada. La leyenda prometía este trazo desde el principio y nadie lo
+   había dibujado: .region.est no tenía regla. La marca solo se enciende cuando
+   distingue algo — la vista añade .show-est al grupo cuando hay estimaciones y
+   no lo son todas; si lo son todas, la leyenda lo dice con palabras y el mapa
+   se queda limpio. (2026-09-06) */
+.show-est .region.est{stroke:rgba(40,49,29,.62)!important; stroke-width:.85!important;
+  stroke-dasharray:2.6 2; stroke-linecap:butt}
+
+/* legend */
+.legend{position:absolute; left:20px; bottom:18px; background:rgba(251,246,234,.94); backdrop-filter:blur(3px);
+  border:1px solid var(--border-lt); border-radius:0; padding:11px 13px; box-shadow:var(--shadow); max-width:280px}
+.legend-title{font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--ink-2); margin-bottom:8px}
+.legend-bar{display:flex; height:11px; border-radius:0; overflow:hidden; border:1px solid rgba(0,0,0,.08)}
+.legend-bar i{flex:1}
+/* Barra continua: el degradado ES la rampa, muestreada de la misma escala con la
+   que se pinta el mapa, y las marcas caen donde esa escala pone cada valor. */
+.legend-bar.cont{display:block; position:relative; overflow:visible; height:12px; width:240px; max-width:100%}
+.legend-bar.cont i{position:absolute; top:-2px; bottom:-2px; width:1px; background:rgba(40,49,29,.55);
+  transform:translateX(-.5px)}
+.legend-labels{display:flex; justify-content:space-between; margin-top:2px; font-size:10px; color:var(--ink-3)}
+/* Los rótulos intermedios van en su propia línea: centrados sobre su marca, no
+   compiten con el mínimo y el máximo, que están anclados a los extremos. */
+.legend-ticks{position:relative; height:13px; margin-top:4px; font-size:9.5px; color:var(--ink-3)}
+.legend-ticks span{position:absolute; top:0; transform:translateX(-50%); white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.legend-note{margin-top:6px; font-size:9.5px; line-height:1.3; color:var(--ink-3); font-style:italic}
+.legend-keys{margin-top:7px; display:flex; flex-wrap:wrap; gap:4px 11px; font-size:9.5px; color:var(--ink-3)}
+.legend-keys .lk{display:inline-flex; align-items:center; gap:5px}
+.legend-keys .lk i{width:9px; height:9px; border:1px solid rgba(40,49,29,.22); flex-shrink:0}
+.legend-foot{margin-top:9px; font-size:9.5px; color:var(--ink-3); display:flex; align-items:center; gap:6px; line-height:1.3}
+.legend-foot:empty{display:none}
+.legend-foot .dash{width:16px; height:0; border-top:2px dashed rgba(40,49,29,.55); flex-shrink:0}
+
+/* tooltip */
+.tt{position:fixed; z-index:600; pointer-events:none; background:var(--paper); color:var(--ink);
+  border:1px solid var(--border-dk); border-radius:0; padding:9px 12px; font-size:12.5px;
+  box-shadow:3px 3px 0 rgba(40,49,29,.13); max-width:280px; opacity:0; transition:opacity .1s}
+.tt.on{opacity:1}
+.tt-title{font-weight:700; margin-bottom:2px; color:var(--ink); letter-spacing:.02em}
+.tt-val{font-family:var(--serif); font-style:italic; font-weight:500; font-size:19px; line-height:1.15;
+  color:var(--olive-dk); font-variant-numeric:tabular-nums}
+.tt-sub{color:var(--ink-3); font-size:11px; margin-top:3px; letter-spacing:.2px}
+.tt-chip{display:inline-block; margin-top:5px; font-size:9.5px; padding:1px 6px; border-radius:0;
+  background:rgba(176,86,32,.12); color:var(--terra-dk); border:1px solid rgba(176,86,32,.28);
+  text-transform:uppercase; letter-spacing:.06em}
+/* Tarjeta táctil: anclada sobre la línea de tiempo (no se recorta por el borde
+   derecho de un teléfono de 390 px) y con su propio cierre de 44 px. */
+.tt.touch{left:12px!important; right:12px; top:auto!important;
+  bottom:calc(var(--timeline-h) + var(--footer-h) + 12px + env(safe-area-inset-bottom));
+  max-width:none; width:auto; pointer-events:auto; padding-right:48px}
+.tt-close{position:absolute; top:0; right:0; width:44px; height:44px; border:0; background:transparent;
+  color:var(--ink-3); font-size:22px; line-height:1; cursor:pointer}
+.tt-close:hover{color:var(--terra-dk)}
+
+/* timeline */
+.timeline{height:var(--timeline-h); flex-shrink:0; display:flex; align-items:center; gap:14px;
+  padding:0 22px; background:var(--paper); border-top:1px solid var(--border-lt); z-index:30}
+.tl-play{width:36px; height:36px; border-radius:0; border:1px solid var(--border); background:var(--rail);
+  color:var(--cream); cursor:pointer; display:grid; place-items:center; flex-shrink:0; transition:var(--tr)}
+.tl-play:hover{background:var(--olive-deep)}
+.tl-play svg{width:17px; height:17px}
+.tl-speed{background:var(--cream-2); border:1px solid var(--border-lt); border-radius:0; padding:5px 9px;
+  font-size:11px; font-weight:700; color:var(--ink-2); cursor:pointer; flex-shrink:0}
+.tl-track{flex:1; position:relative; height:34px; display:flex; align-items:center; cursor:pointer}
+.tl-rail{position:absolute; left:0; right:0; height:4px; background:var(--cream-3); border-radius:0}
+.tl-fill{position:absolute; height:4px; background:linear-gradient(90deg,var(--olive-lt),var(--terra)); border-radius:0}
+/* Excepción a los bordes cuadrados: es la perilla que se arrastra. */
+.tl-handle{position:absolute; width:16px; height:16px; border-radius:50%; background:var(--paper);
+  border:2px solid var(--terra-dk); transform:translateX(-50%); box-shadow:0 1px 4px rgba(0,0,0,.25); cursor:grab; top:50%; margin-top:-8px}
+.tl-handle:active{cursor:grabbing}
+.tl-year{font-family:var(--serif); font-style:italic; font-size:26px; font-weight:500; color:var(--ink);
+  min-width:70px; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums}
+.tl-year small{font-family:var(--ff); font-size:11px; color:var(--ink-3); font-weight:600}
+
+/* footer */
+.footer{height:var(--footer-h); flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; background:var(--rail); color:var(--rail-ink-2); font-size:11px; letter-spacing:.2px; z-index:30}
+.footer a{color:var(--cream); text-decoration:none}
+.footer-actions{display:flex; gap:14px}
+.footer-actions button{background:none; border:0; color:var(--rail-ink-2); cursor:pointer; font-size:11px; letter-spacing:.3px}
+.footer-actions button:hover{color:var(--cream)}
+/* Cinco acciones no caben con su nombre entero en un teléfono: la etiqueta
+   larga cede el sitio a una corta, en vez de desbordar el pie. */
+.footer-actions .lbl-short{display:none}
+
+/* ════════════════ RAIL (contextual right panel) ════════════════ */
+.rail{width:var(--rail-w); flex-shrink:0; background:var(--paper); border-left:1px solid var(--border-lt);
+  display:flex; flex-direction:column; overflow:hidden}
+.rail-head{padding:14px 16px 10px; border-bottom:1px solid var(--border-lt)}
+.rail-head h3{font-family:var(--serif); font-size:16px; font-weight:500; color:var(--ink)}
+.rail-head p{font-size:11px; color:var(--ink-3); margin-top:3px; line-height:1.4}
+.rail-body{flex:1; overflow-y:auto; padding:12px 14px}
+.rail-body::-webkit-scrollbar{width:8px}
+.rail-body::-webkit-scrollbar-thumb{background:var(--border); border-radius:0}
+/* Piezas de la hoja inferior: invisibles mientras el rail es una columna. */
+.rail-sheet-bar{display:none}
+.rail-toggle{display:none}
+
+/* stat rows / rankings */
+.rank-row{display:flex; align-items:center; gap:9px; padding:6px 0; border-bottom:1px solid var(--border-lt)}
+.rank-num{font-size:11px; font-weight:700; color:var(--ink-3); width:18px; text-align:right; flex-shrink:0}
+.rank-body{flex:1; min-width:0}
+.rank-name{font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.rank-bar{height:5px; border-radius:0; margin-top:3px; background:var(--gold)}
+.rank-val{font-size:11px; font-weight:700; color:var(--ink-2); flex-shrink:0; text-align:right}
+
+/* ════════════════ EVIDENCE VIEW ════════════════ */
+.ev-layout{flex:1; display:flex; min-height:0}
+.ev-map{flex:1; position:relative; min-width:0}
+.ev-side{width:360px; flex-shrink:0; background:var(--paper); border-left:1px solid var(--border-lt);
+  display:flex; flex-direction:column; overflow:hidden}
+.ev-types{padding:10px 12px; border-bottom:1px solid var(--border-lt); display:flex; flex-wrap:wrap; gap:6px}
+.ev-type{display:inline-flex; align-items:center; gap:6px; padding:4px 9px; border-radius:0;
+  border:1px solid var(--border-lt); background:var(--cream); cursor:pointer; font-size:11px; font-weight:600;
+  color:var(--ink-2); transition:var(--tr-f); user-select:none}
+/* Excepción: representa un punto del mapa, que es redondo. */
+.ev-type .dot{width:9px; height:9px; border-radius:50%; flex-shrink:0}
+.ev-type .n{font-size:9.5px; color:var(--ink-3); font-weight:600}
+.ev-type.off{opacity:.32; filter:grayscale(.6)}
+.ev-type:hover{border-color:var(--border-dk)}
+.ev-gallery{flex:1; overflow-y:auto; padding:10px 12px}
+.ev-gallery::-webkit-scrollbar{width:8px}
+.ev-gallery::-webkit-scrollbar-thumb{background:var(--border); border-radius:0}
+.ev-count{font-size:11px; color:var(--ink-3); margin-bottom:8px; letter-spacing:.2px}
+.ev-card{background:var(--cream); border:1px solid var(--border-lt); border-left-width:3px; border-radius:0;
+  padding:11px 12px; margin-bottom:9px; transition:var(--tr); cursor:default}
+.ev-card:hover{box-shadow:var(--shadow); transform:translateY(-1px)}
+.ev-card-top{display:flex; align-items:baseline; gap:7px; margin-bottom:4px}
+.ev-card-type{font-size:9px; font-weight:700; letter-spacing:.6px; text-transform:uppercase}
+.ev-card-date{margin-left:auto; font-size:10.5px; font-weight:700; color:var(--ink-2); white-space:nowrap}
+.ev-card-site{font-family:var(--serif); font-size:16px; font-weight:500; color:var(--ink); line-height:1.2}
+.ev-card-loc{font-size:11px; color:var(--ink-3); margin-top:1px}
+.ev-card-meta{display:flex; flex-wrap:wrap; gap:5px; margin-top:7px}
+.ev-tag{font-size:9px; padding:2px 7px; border-radius:0; background:var(--cream-2); color:var(--ink-2);
+  border:1px solid var(--border-lt); letter-spacing:.3px}
+.ev-tag.dating{background:rgba(46,123,166,.1); color:var(--aegean); border-color:rgba(46,123,166,.24)}
+.ev-tag.val{background:rgba(201,162,39,.14); color:#6F5810; border-color:rgba(201,162,39,.42); font-weight:700}
+.ev-card-ref{font-size:10.5px; color:var(--ink-2); margin-top:8px; line-height:1.4; padding-top:7px; border-top:1px solid var(--border-lt)}
+.ev-card-ref a{color:var(--aegean); text-decoration:none}
+.ev-card-ref a:hover{text-decoration:underline}
+.ev-card-quote{font-family:var(--serif); font-style:italic; font-size:12px; color:var(--ink-2); margin-top:6px;
+  padding-left:9px; border-left:2px solid var(--olive); line-height:1.4}
+.ev-pt{cursor:pointer; transition:opacity .2s}
+/* evidence detail panel */
+.ev-detail{position:absolute; inset:0; background:var(--paper); z-index:5; display:none; flex-direction:column;
+  overflow-y:auto; padding:14px 16px 24px; animation:fadeUp .25s ease}
+.ev-detail.on{display:flex}
+.ev-d-close{align-self:flex-start; background:none; border:0; color:var(--aegean); cursor:pointer; font-size:12px; font-weight:600; padding:2px 0 10px}
+.ev-d-badge{display:inline-block; align-self:flex-start; color:#fff; font-size:10px; font-weight:700; letter-spacing:.5px;
+  text-transform:uppercase; padding:4px 10px; border-radius:0; margin-bottom:10px}
+.ev-d-site{font-family:var(--serif); font-size:24px; font-weight:500; color:var(--ink); line-height:1.12}
+.ev-d-loc{font-size:12px; color:var(--ink-3); margin-top:3px}
+.ev-d-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; margin:14px 0}
+.ev-d-row{border-bottom:1px solid var(--border-lt); padding-bottom:6px}
+.ev-d-k{display:block; font-size:9px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:var(--ink-3)}
+.ev-d-v{font-size:13px; font-weight:600; color:var(--ink)}
+.ev-d-note,.ev-d-ref{margin-top:10px}
+.ev-d-note p{font-family:var(--serif); font-style:italic; font-size:13px; color:var(--ink-2); line-height:1.5; margin-top:4px;
+  padding-left:10px; border-left:2px solid var(--olive)}
+.ev-d-ref p{font-size:12px; color:var(--ink-2); line-height:1.5; margin-top:4px}
+.ev-d-ref a{color:var(--aegean); text-decoration:none}
+.ev-d-ref a:hover{text-decoration:underline}
+.ev-d-src{margin-top:12px; font-size:11px; color:var(--ink-3); padding-top:10px; border-top:1px solid var(--border-lt)}
+.ev-side{position:relative}
+.ev-legend-dating{position:absolute; right:16px; bottom:16px; background:rgba(251,246,234,.94); border:1px solid var(--border-lt);
+  border-radius:0; padding:9px 12px; box-shadow:var(--shadow); font-size:10.5px; color:var(--ink-2); max-width:220px}
+
+/* ════════════════ BILATERAL ════════════════ */
+.bi-ribbon{fill:var(--gold); transition:fill-opacity .2s}
+.bi-node{cursor:pointer}
+.bi-src{fill:var(--terra); stroke:var(--paper); stroke-width:1.2}
+.bi-label{font-size:10px; fill:var(--ink); paint-order:stroke; stroke:var(--paper); stroke-width:3px; stroke-linejoin:round}
+
+/* ════════════════ ABOUT ════════════════ */
+.about{position:absolute; inset:0; background:var(--cream); overflow-y:auto; display:none; z-index:70}
+.about.on{display:block}
+.about-inner{max-width:900px; margin:0 auto; padding:56px 40px 80px}
+.about h1{font-family:var(--serif); font-size:44px; font-weight:500; color:var(--ink); line-height:1.02;
+  letter-spacing:-.012em}
+.about h1 em{font-style:italic; color:var(--olive)}
+.about-lead{font-family:var(--serif); font-style:italic; font-size:19px; color:var(--ink-2); margin-top:14px; max-width:680px; line-height:1.5}
+.about-branch{color:var(--olive); width:260px; margin:26px 0}
+.about h2{font-family:var(--serif); font-size:23px; font-weight:500; color:var(--ink); margin:38px 0 12px}
+.about p{color:var(--ink-2); margin-bottom:12px; max-width:720px; line-height:1.65}
+.about-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:20px}
+.about-card{background:var(--paper); border:1px solid var(--border-lt); border-radius:0; padding:18px; border-top:3px solid var(--terra)}
+.about-card .k{font-size:10px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-3)}
+.about-card .v{font-family:var(--serif); font-size:32px; font-weight:500; color:var(--ink); margin:5px 0 2px; line-height:1;
+  font-variant-numeric:tabular-nums}
+.about-card .d{font-size:12px; color:var(--ink-2); line-height:1.4}
+.about-sources{margin-top:14px; display:flex; flex-direction:column; gap:10px}
+.about-src{background:var(--paper); border:1px solid var(--border-lt); border-radius:0; padding:13px 15px; border-left:3px solid var(--olive)}
+.about-src .t{font-weight:700; font-size:13px; color:var(--ink)}
+.about-src .m{font-size:11.5px; color:var(--ink-3); margin-top:3px; line-height:1.4}
+.about-close{position:fixed; top:16px; right:22px; z-index:80; background:var(--rail); color:var(--cream);
+  border:0; border-radius:0; width:38px; height:38px; cursor:pointer; font-size:18px}
+
+/* loading */
+.loading{position:fixed; inset:0; z-index:1500; display:grid; place-items:center; background:var(--cream); transition:opacity .4s}
+.loading.gone{opacity:0; pointer-events:none}
+.loading .spin{width:44px; height:44px; border:3px solid var(--border-lt); border-top-color:var(--terra); border-radius:0; animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:820px){
+  :root{--rail-w:0px; --sidebar-w:64px}
+  .ev-side{display:none}
+  .tb-title .sub{display:none}
+
+  /* ── Rail de ranking como hoja inferior ──────────────────────────────────────
+     Antes desaparecía sin alternativa por debajo de 820 px: con él se iban los
+     rankings, el conmutador Total / Por superficie y las filas que alimentan la
+     descarga CSV. Aquí deja de ser columna y sube desde el pie con el botón
+     «Ranking». */
+  .rail{
+    position:fixed; inset:auto 0 0 0; width:auto;
+    height:min(56dvh,56vh);
+    border-left:0; border-top:1px solid var(--border-lt);
+    border-radius:0;
+    box-shadow:0 -10px 30px rgba(0,0,0,.24);
+    z-index:70; transform:translateY(100%); transition:transform .24s ease;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .rail.open{transform:none}
+  .rail-sheet-bar{display:flex; align-items:center; justify-content:flex-end; position:relative;
+    flex:0 0 auto; height:28px; padding:0 4px}
+  .rail-sheet-grip{position:absolute; top:6px; left:50%; margin-left:-21px; width:42px; height:4px;
+    border-radius:0; background:var(--border-lt)}
+  .rail-sheet-close{width:44px; height:44px; border:0; background:transparent; color:var(--ink-3);
+    font-size:24px; line-height:1; cursor:pointer; display:grid; place-items:center}
+  .rail-head{padding-top:4px}
+  .rail-toggle{display:inline-flex; align-items:center}
+}
+
+/* ===== Móvil y táctil (auditoría 2026-09-05; ver 06_dev/docs/visores_2026-09) ===== */
+.tl-track{touch-action:none}
+@supports not (height:100dvh){#app{min-height:-webkit-fill-available}}
+@media (max-width:900px){
+  .topbar{height:auto; min-height:var(--topbar-h); flex-wrap:wrap; align-items:flex-start; padding:8px 12px; gap:6px 10px}
+  .tb-title{white-space:normal; font-size:15px; line-height:1.2; flex:1 1 100%}
+  .tb-sep,.tb-spacer{display:none}
+  .tb-controls{flex:1 1 100%; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-bottom:2px}
+  .tb-controls::-webkit-scrollbar{display:none}
+  .sel{max-width:100%}
+  .footer{height:auto; min-height:var(--footer-h); flex-wrap:nowrap; gap:12px; padding:6px 12px}
+  #footer-src{flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .footer-actions{flex-shrink:0; gap:10px}
+  .footer-actions button{white-space:nowrap; min-height:32px; font-size:12px}
+}
+@media (max-width:820px){
+  .sb-brand{padding:12px 4px 10px}
+  .sb-brand .m{font-size:14px; letter-spacing:-.01em}
+  .sb-brand .o{display:none}
+  .sidebar{overflow:hidden}
+}
+@media (max-width:700px){
+  /* El rótulo dentro del lienzo existe para que una captura se entienda sola.
+     En un teléfono se comía el mapa y la barra superior ya lleva ese título
+     una línea más arriba, así que ahí se retira (la exportación en PNG dibuja
+     su propio pie, de modo que la figura descargada sigue completa). */
+  .map-caption{display:none}
+  .footer-actions .lbl-long{display:none}
+  .footer-actions .lbl-short{display:inline}
+  .footer-actions{gap:8px}
+  .footer-actions button{font-size:11px}
+}
+@media (max-width:640px){
+  /* El botón «Ranking» ocupa sitio en el pie y dejaba la fuente en «O…».
+     En un teléfono la pantalla completa no aporta (el alto ya se calcula con dvh),
+     así que ese botón cede su sitio a la cadena de fuente. */
+  #btn-fs{display:none}
+  .timeline{height:auto; flex-wrap:wrap; padding:8px 12px; gap:8px 10px}
+  .tl-track{flex:1 1 100%; order:3; height:44px}
+  .tl-year{margin-left:auto; font-size:22px; min-width:0}
+  .map-year{font-size:26px; top:6px; right:10px}
+  .legend,.ev-legend-dating{left:8px; right:8px; bottom:8px; max-width:none; padding:8px 10px}
+  .legend-bar.cont{width:100%}
+  .legend-foot{display:none}
+  .about-inner{padding:20px 16px 72px}
+  .about h1{font-size:28px}
+  .about-lead{font-size:16px}
+  .about-branch{width:180px; margin:16px 0}
+  .about h2{font-size:19px; margin:26px 0 10px}
+  .about-card{padding:14px}
+  .about-card .v{font-size:24px}
+}
+@media (pointer:coarse){
+  .pill{padding:10px 14px; font-size:13px}
+  .pillset{gap:4px}
+  .tl-play{width:44px; height:44px}
+  .tl-speed{min-height:40px; padding:8px 12px; font-size:13px}
+  .tl-handle{width:26px; height:26px; margin-top:-13px}
+  .sel{min-height:44px; font-size:16px; max-width:100%}
+  .about-close{position:fixed; top:12px; right:12px; width:44px; height:44px; max-width:calc(100vw - 24px)}
+  .ev-type{padding:9px 12px; font-size:13px}
+  .ev-d-close{min-height:44px; display:flex; align-items:center}
+  .footer-actions button{min-height:36px}
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   EVIDENCIA — sub-pestañas: mapa · espacio×tiempo · tipo×región · fuentes/QA
+   (2026-09-05; lógica portada del atlas de cobertura del proyecto olivar)
+   ══════════════════════════════════════════════════════════════════ */
+#view-evidence{flex-direction:column}
+.ev-tabs{display:flex; gap:2px; flex-shrink:0; padding:0 14px; background:var(--paper);
+  border-bottom:1px solid var(--border-lt); overflow-x:auto; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none}
+.ev-tabs::-webkit-scrollbar{display:none}
+.ev-tab{background:none; border:0; border-bottom:2px solid transparent; padding:9px 14px; cursor:pointer;
+  font:inherit; font-size:12px; font-weight:600; color:var(--ink-3); white-space:nowrap; transition:var(--tr-f)}
+.ev-tab:hover{color:var(--ink-2); background:rgba(176,86,32,.08)}
+.ev-tab.on{color:var(--ink); border-bottom-color:var(--terra)}
+.ev-panels{flex:1; position:relative; min-height:0}
+.ev-panel{position:absolute; inset:0; display:none; flex-direction:column}
+.ev-panel.on{display:flex}
+.ev-panel.scroll{overflow-y:auto; overflow-x:hidden; padding:18px 22px 40px}
+.ev-panel.scroll.on{display:block}
+.ev-panel.scroll::-webkit-scrollbar{width:9px}
+.ev-panel.scroll::-webkit-scrollbar-thumb{background:var(--border); border-radius:0}
+
+.ev-corpus-note{font-size:11.5px; color:var(--ink-3); line-height:1.4}
+.ev-corpus-note b{color:var(--ink-2)}
+
+.ev-pan-head{max-width:860px; margin-bottom:14px}
+.ev-pan-head h3{font-family:var(--serif); font-size:21px; font-weight:500; color:var(--ink); line-height:1.15}
+.ev-pan-head p{font-size:12.5px; color:var(--ink-2); line-height:1.55; margin-top:7px}
+.ev-pan-head p i{color:var(--ink-3)}
+.ev-modes{display:flex; gap:4px; margin-top:11px; flex-wrap:wrap}
+.ev-pan-foot{font-size:11px; color:var(--ink-3); line-height:1.5; margin:8px 0 20px; max-width:900px}
+.ev-pan-foot b{color:var(--ink-2)}
+.ev-hint{color:var(--terra-dk)}
+.ev-sub{font-size:10px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-3);
+  margin:20px 0 9px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
+.ev-sub-n{font-weight:600; letter-spacing:0; text-transform:none; font-size:11px; color:var(--ink-3); opacity:.85}
+
+/* matrices */
+.ev-mx-scroll{overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;
+  border:1px solid var(--border-lt); border-radius:0; background:var(--paper); padding:8px 10px}
+.ev-mx-scroll::-webkit-scrollbar{height:9px}
+.ev-mx-scroll::-webkit-scrollbar-thumb{background:var(--border); border-radius:0}
+.ev-mx{display:block; max-width:none}
+.mx-head{font-size:10px; font-weight:700; fill:var(--ink-2); letter-spacing:.2px}
+.mx-head.tot{fill:var(--ink-3)}
+.mx-row{font-size:11px; font-weight:600; fill:var(--ink)}
+.mx-row.tot{font-size:9.5px; font-weight:700; fill:var(--ink-3); text-transform:uppercase; letter-spacing:.5px}
+.mx-val{font-size:10.5px; font-weight:600; font-variant-numeric:tabular-nums;
+  paint-order:stroke; stroke-width:2.4px; stroke-linejoin:round}
+.mx-val.tot{fill:var(--ink-2); font-weight:700}
+.mx-val.grand{fill:var(--terra-dk); font-weight:800}
+.mx-cell rect{transition:stroke .12s ease}
+.mx-cell:hover rect{stroke:var(--ink); stroke-width:1.4}
+
+.ev-mx-legend{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:9px; font-size:10.5px;
+  color:var(--ink-3)}
+.ev-mx-legend .rl{font-weight:700; letter-spacing:.3px; text-transform:uppercase; font-size:9.5px; color:var(--ink-2)}
+.ev-mx-legend .rl.dim{font-weight:500; text-transform:none; letter-spacing:0; color:var(--ink-3)}
+.ev-mx-legend .rbar{display:flex; height:10px; width:180px; border-radius:0; overflow:hidden;
+  border:1px solid var(--border-lt)}
+.ev-mx-legend .rbar i{flex:1}
+.ev-mx-legend .rn{font-variant-numeric:tabular-nums; font-weight:700; color:var(--ink-2)}
+
+.ev-typekey{display:flex; flex-wrap:wrap; gap:5px 10px; margin-top:9px}
+.tkey{display:inline-flex; align-items:center; gap:5px; font-size:10.5px; color:var(--ink-2)}
+.tkey i{width:10px; height:10px; border-radius:0; flex-shrink:0}
+.tkey b{color:var(--ink-3); font-variant-numeric:tabular-nums; font-weight:700}
+
+/* fuentes / QA */
+.ev-kpis{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:4px}
+.ev-kpi{background:var(--paper); border:1px solid var(--border-lt); border-top:3px solid var(--terra);
+  border-radius:0; padding:10px 14px; min-width:132px; flex:1 1 132px}
+.ev-kpi b{display:block; font-family:var(--serif); font-size:26px; font-weight:500; color:var(--ink); line-height:1;
+  font-variant-numeric:tabular-nums}
+.ev-kpi span{display:block; font-size:11px; color:var(--ink-3); margin-top:3px; line-height:1.3}
+
+.ev-confbar{display:flex; height:26px; border-radius:0; overflow:hidden; border:1px solid var(--border-lt)}
+.ev-confbar .seg{display:grid; place-items:center; min-width:0; overflow:hidden}
+.ev-confbar .seg i{font-style:normal; font-size:10px; font-weight:700; color:#FBF6EA; white-space:nowrap;
+  padding:0 6px; text-shadow:0 1px 2px rgba(0,0,0,.25)}
+
+.ev-flags{display:flex; flex-direction:column; gap:5px}
+.ev-flag{display:grid; grid-template-columns:minmax(150px,1fr) minmax(90px,2fr) 116px; align-items:center; gap:10px}
+.ev-flag .fl{font-size:11.5px; color:var(--ink-2)}
+.ev-flag .fb{height:11px; background:var(--cream-2); border-radius:0; overflow:hidden}
+.ev-flag .fb i{display:block; height:100%; background:linear-gradient(90deg,var(--gold),var(--terra)); border-radius:0}
+.ev-flag .fv{font-size:11.5px; font-weight:700; color:var(--ink); text-align:right; font-variant-numeric:tabular-nums}
+.ev-flag .fv em{display:inline-block; font-style:normal; font-weight:600; color:var(--ink-3); margin-left:7px;
+  min-width:48px}
+
+.ev-srcbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:9px}
+.ev-search{flex:1 1 220px; min-width:170px; background:var(--paper); border:1px solid var(--border);
+  border-radius:0; padding:8px 12px; font:inherit; font-size:12.5px; color:var(--ink)}
+.ev-search:focus{border-color:var(--terra)}
+/* Sin esta regla el marcador de posición se queda en el gris por defecto del
+   navegador (#757575 sobre el papel = 4,26:1, por debajo de 4,5). */
+.ev-search::placeholder{color:var(--ink-3); opacity:1}
+
+.ev-tbl-scroll{overflow:auto; max-height:min(52vh,520px); border:1px solid var(--border-lt); border-radius:0;
+  background:var(--paper); -webkit-overflow-scrolling:touch}
+.ev-tbl-scroll::-webkit-scrollbar{width:9px; height:9px}
+.ev-tbl-scroll::-webkit-scrollbar-thumb{background:var(--border); border-radius:0}
+.ev-tbl{border-collapse:collapse; width:100%; min-width:920px; font-size:11.5px}
+.ev-tbl th{position:sticky; top:0; z-index:2; background:var(--cream-2); text-align:left; font-size:9.5px;
+  font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-2);
+  padding:8px 9px; border-bottom:1px solid var(--border)}
+.ev-tbl td{padding:7px 9px; border-bottom:1px solid var(--border-lt); vertical-align:middle; color:var(--ink-2)}
+.ev-tbl tr:hover td{background:rgba(176,86,32,.07)}
+.ev-tbl th.num,.ev-tbl td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;
+  font-weight:700; color:var(--ink)}
+.ev-tbl td.src{font-weight:600; color:var(--ink); max-width:250px; word-break:break-word}
+.ev-tbl td.num .nbar{display:inline-block; width:52px; height:6px; background:var(--cream-2); border-radius:0;
+  overflow:hidden; margin-right:7px; vertical-align:middle}
+.ev-tbl td.num .nbar i{display:block; height:100%; background:var(--gold); border-radius:0}
+.ev-tbl td.tks{white-space:nowrap; font-size:14px; letter-spacing:2px}
+.ev-tbl td.yrs{white-space:nowrap; font-variant-numeric:tabular-nums; font-size:11px; color:var(--ink-3)}
+.ev-tbl td.conf{width:96px}
+.ev-tbl .cbar{display:flex; height:8px; width:84px; border-radius:0; overflow:hidden; background:var(--cream-2)}
+.ev-tbl .cbar i{display:block; height:100%}
+.ev-tbl td.lnk{white-space:nowrap}
+.ev-tbl td.lnk a{color:var(--aegean); text-decoration:none; font-weight:700; font-size:10.5px}
+.ev-tbl td.lnk a:hover{text-decoration:underline}
+.ev-tbl td.ref{max-width:340px; font-size:10.5px; color:var(--ink-3); line-height:1.4}
+.ev-none{color:var(--border-dk)}
+
+/* móvil */
+@media (max-width:900px){
+  .ev-panel.scroll{padding:14px 12px 48px}
+  .ev-pan-head h3{font-size:17px}
+  .ev-kpi{min-width:calc(50% - 4px); flex:1 1 calc(50% - 4px); padding:9px 11px}
+  .ev-kpi b{font-size:20px}
+  .ev-flag{grid-template-columns:1fr; gap:2px; padding-bottom:6px; border-bottom:1px solid var(--border-lt)}
+  .ev-flag .fv{text-align:left}
+  .ev-tbl-scroll{max-height:none}
+  .ev-mx-legend .rbar{width:130px}
+}
+@media (pointer:coarse){
+  .ev-tab{padding:12px 14px; font-size:13px; min-height:44px}
+  .ev-search{min-height:44px; font-size:16px}
+  .ev-tbl td{padding:10px 9px}
+}
+
+/* ── Ficha de evidencia en móvil: hoja inferior ────────────────────────────────────────
+   Corrección del 2026-09-05. La regla de arriba oculta .ev-side por debajo de 820 px, y la
+   ficha de detalle (#ev-detail) se inyecta dentro de ese contenedor, así que en el móvil
+   tocar un punto del mapa no abría nada: el detalle existía pero heredaba display:none.
+   Aquí .ev-side deja de ser una columna y pasa a ser solo el anclaje de una hoja inferior. */
+@media (max-width:820px){
+  .ev-side{
+    display:block; position:fixed; inset:auto 0 0 0; width:auto; height:0;
+    border-left:0; background:none; overflow:visible;
+    pointer-events:none; z-index:60;
+  }
+  /* Todo lo que vivía en la columna lateral (rankings, listas) sigue oculto: solo sube la ficha. */
+  .ev-side > *:not(.ev-detail){display:none}
+
+  .ev-detail{
+    position:fixed; inset:auto 0 0 0; top:auto;
+    max-height:min(72dvh,72vh); width:auto;
+    border-radius:0;
+    border-top:1px solid var(--border-lt);
+    box-shadow:0 -10px 30px rgba(0,0,0,.24);
+    padding:10px 16px calc(20px + env(safe-area-inset-bottom));
+    pointer-events:auto;
+    overscroll-behavior:contain;
+  }
+  /* Asa visual para que se lea como una hoja que se puede cerrar. */
+  .ev-detail.on::before{
+    content:''; display:block; flex:0 0 auto; width:42px; height:4px; margin:2px auto 10px;
+    border-radius:0; background:var(--border-lt);
+  }
+  /* El cierre tiene que ser alcanzable con el pulgar y cumplir los 44 px. */
+  .ev-d-close{
+    align-self:flex-end; min-height:44px; min-width:44px;
+    display:flex; align-items:center; justify-content:flex-end;
+    padding:0 2px; font-size:13px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ESQUINAS · border-radius:0 en toda la interfaz.
+   Excepciones vivas, y su motivo. No hay ninguna más en esta hoja
+   (compruébalo con:  grep -n "radius" css/styles.css | grep -v "radius:0").
+
+   1. .tl-handle — 50%. Es el asa que se arrastra en la línea de tiempo:
+      redonda para que se lea como agarre y no como otro botón cuadrado.
+   2. .ev-type .dot — 50%. Representa un punto del mapa de evidencia, que
+      es un dato circular; el chip que lo contiene sí es cuadrado.
+      (Su equivalente inyectado desde js/views/bilateral.js — los dos
+      círculos de la leyenda de nodos — es la misma excepción: son datos.)
+
+   Ya NO son excepción, y se cuadraron en este paso:
+   el spinner de carga (.loading .spin), el favicon (rx='4') y el <code>
+   del aviso de file:// dentro de index.html.
+   ══════════════════════════════════════════════════════════════════ */

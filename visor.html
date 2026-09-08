@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Minerva · Historia del olivar</title>
+<meta name="description" content="Atlas interactivo de la historia del olivar: evidencia arqueológica, series subnacionales, tendencias mundiales y comercio del aceite de oliva.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%231C2A17'/%3E%3Cpath d='M12 4c-3 3-3 8 0 14 3-6 3-11 0-14z' fill='%23C9A227'/%3E%3Cpath d='M12 18c2-2 5-2 7-1' stroke='%238CA35A' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css?v=20260906m">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-geo-projection@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+</head>
+<body>
+
+<!-- file:// guard — runs even when ES modules are blocked (double-click / file://) -->
+<script>
+(function () {
+  if (location.protocol !== 'file:') return;
+  window.addEventListener('DOMContentLoaded', function () {
+    var o = document.createElement('div');
+    o.style.cssText = 'position:fixed;inset:0;z-index:9000;display:grid;place-items:center;background:linear-gradient(150deg,#0B0E07,#12160C);color:#F4ECD9;font-family:Alegreya Sans,system-ui,sans-serif;text-align:center;padding:32px';
+    o.innerHTML = '<div style="max-width:520px">' +
+      '<div style="font-family:Bodoni Moda,Georgia,serif;font-size:42px;color:#EFDDA0;margin-bottom:6px">Minerva</div>' +
+      '<div style="letter-spacing:3px;text-transform:uppercase;font-size:11px;color:rgba(228,197,106,.7);margin-bottom:22px">Historia del olivar</div>' +
+      '<p style="line-height:1.6;color:#D9CBA8">Este atlas necesita un <b>servidor local</b>: los navegadores bloquean los módulos y los datos cuando se abre el archivo directamente (<code>file://</code>).</p>' +
+      '<p style="margin-top:16px;line-height:1.7;color:#D9CBA8">Ábrelo con un doble clic en <b style="color:#EFDDA0">abrir_minerva.bat</b><br>' +
+      '<span style="color:#9A8B62;font-size:13px">o, en una terminal dentro de esta carpeta:</span><br>' +
+      '<code style="display:inline-block;margin-top:6px;background:rgba(228,197,106,.12);padding:6px 12px;border-radius:0;color:#EFDDA0">python -m http.server 8848</code><br>' +
+      '<span style="color:#9A8B62;font-size:13px">y visita</span> <code style="color:#EFDDA0">http://127.0.0.1:8848</code></p>' +
+      '</div>';
+    document.body.appendChild(o);
+  });
+})();
+</script>
+
+<div class="loading" id="loading"><div class="spin"></div></div>
+<div class="tt" id="tt"></div>
+
+<!-- ══════════ APP ══════════ -->
+<div id="app">
+  <nav class="sidebar">
+    <div class="sb-brand"><div class="m">Minerva</div><div class="o">Olivar</div></div>
+    <div class="sb-nav" id="sb-nav"></div>
+    <div class="sb-foot">
+      <button class="sb-info" id="btn-about"><svg viewBox="0 0 24 24"></svg><span class="lbl">Acerca</span></button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-title" id="tb-title"></div>
+      <div class="tb-sep"></div>
+      <div class="tb-controls" id="tb-controls"></div>
+      <div class="tb-spacer"></div>
+    </div>
+
+    <div class="stage" id="stage">
+      <section class="view" id="view-atlas">
+        <div class="map-wrap">
+          <div class="map-caption" id="atlas-caption"><strong></strong><span></span></div>
+          <div class="map-year" id="atlas-year" aria-hidden="true"></div>
+          <svg class="map-svg" id="atlas-svg"></svg>
+          <div class="legend" id="atlas-legend"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-evidence">
+        <div class="ev-tabs" id="ev-tabs" role="tablist" aria-label="Sub-vistas de la evidencia"></div>
+        <div class="ev-panels">
+          <div class="ev-panel on" id="ev-panel-mapa" role="tabpanel">
+            <div class="ev-layout">
+              <div class="ev-map">
+                <div class="map-caption" id="ev-caption"><strong></strong><span></span></div>
+                <svg class="map-svg" id="ev-svg"></svg>
+                <div class="ev-legend-dating" id="ev-legend"></div>
+              </div>
+              <aside class="ev-side">
+                <div class="ev-types" id="ev-types"></div>
+                <div class="ev-gallery" id="ev-gallery"></div>
+              </aside>
+            </div>
+          </div>
+          <div class="ev-panel scroll" id="ev-panel-st" role="tabpanel"></div>
+          <div class="ev-panel scroll" id="ev-panel-tipo" role="tabpanel"></div>
+          <div class="ev-panel scroll" id="ev-panel-qa" role="tabpanel"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-trend">
+        <div class="map-wrap">
+          <div class="map-caption" id="trend-caption"><strong></strong><span></span></div>
+          <div class="map-year" id="trend-year" aria-hidden="true"></div>
+          <svg class="map-svg" id="trend-svg"></svg>
+          <div class="legend" id="trend-legend"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-bilateral">
+        <div class="map-wrap">
+          <div class="map-caption" id="bi-caption"><strong></strong><span></span></div>
+          <div class="map-year" id="bi-year" aria-hidden="true"></div>
+          <svg class="map-svg" id="bi-svg"></svg>
+          <div class="legend" id="bi-legend"></div>
+        </div>
+      </section>
+
+      <div class="about" id="about">
+        <button class="about-close" id="about-close" aria-label="Cerrar">×</button>
+        <div class="about-inner" id="about-inner"></div>
+      </div>
+    </div>
+
+    <div class="timeline" id="timeline">
+      <button class="tl-play" id="tl-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button>
+      <button class="tl-speed" id="tl-speed">1×</button>
+      <div class="tl-track" id="tl-track">
+        <div class="tl-rail"></div>
+        <div class="tl-fill" id="tl-fill"></div>
+        <div class="tl-handle" id="tl-handle"></div>
+      </div>
+      <div class="tl-year" id="tl-year"></div>
+    </div>
+
+    <div class="footer">
+      <span id="footer-src">Minerva · Historia del olivar</span>
+      <div class="footer-actions">
+        <button id="btn-rail" class="rail-toggle" type="button" aria-controls="rail" aria-expanded="false">Ranking</button>
+        <button id="btn-download" title="Descargar en CSV los datos de esta vista"><span class="lbl-long">Descargar datos</span><span class="lbl-short">CSV</span></button>
+        <button id="btn-png" title="Descargar esta figura en PNG"><span class="lbl-long">Descargar figura</span><span class="lbl-short">PNG</span></button>
+        <button id="btn-link" title="Copiar el enlace a esta vista"><span class="lbl-long">Copiar enlace</span><span class="lbl-short">Enlace</span></button>
+        <button id="btn-reset" title="Volver al estado inicial"><span class="lbl-long">Reiniciar</span><span class="lbl-short">Reinicio</span></button>
+        <button id="btn-fs">Pantalla completa</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="rail" id="rail">
+    <!-- Solo visible cuando el rail es hoja inferior (<= 820 px). -->
+    <div class="rail-sheet-bar">
+      <span class="rail-sheet-grip" aria-hidden="true"></span>
+      <button class="rail-sheet-close" id="rail-sheet-close" type="button" aria-label="Cerrar ranking">&times;</button>
+    </div>
+    <div class="rail-head" id="rail-head"></div>
+    <div class="rail-body" id="rail-body"></div>
+  </aside>
+</div>
+
+<script type="module" src="js/boot.js?v=20260906m"></script>
+</body>
+</html>
