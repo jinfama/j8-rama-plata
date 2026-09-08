@@ -1,0 +1,12 @@
+# Scripts de conversión de datos (no desplegar)
+build/
+
+# Backups
+*_backup.*
+*.bak
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+__pycache__/
