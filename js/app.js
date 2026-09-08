@@ -1,16 +1,16 @@
 // ════════════════════════════════════════════════════════════════
 //  MINERVA · app controller
 // ════════════════════════════════════════════════════════════════
-import { State } from './state.js?v=20260906m';
-import { ICONS } from './utils.js?v=20260906m';
-import { moveTip, hideTip } from './tip.js?v=20260906m';
-import AtlasView from './views/atlas.js?v=20260906m';
-import EvidenceView from './views/evidence.js?v=20260906m';
-import TrendView from './views/trend.js?v=20260906m';
-import BilateralView from './views/bilateral.js?v=20260906m';
-import { renderAbout } from './about.js?v=20260906m';
-import { exportActivePng, toast } from './export-png.js?v=20260906m';
-import { copyPermalink, readUrlState, resetToDefaults, startPermalink } from './permalink.js?v=20260906m';
+import { State } from './state.js?v=20260908b';
+import { ICONS } from './utils.js?v=20260908b';
+import { moveTip, hideTip } from './tip.js?v=20260908b';
+import AtlasView from './views/atlas.js?v=20260908b';
+import EvidenceView from './views/evidence.js?v=20260908b';
+import TrendView from './views/trend.js?v=20260908b';
+import BilateralView from './views/bilateral.js?v=20260908b';
+import { renderAbout } from './about.js?v=20260908b';
+import { exportActivePng, toast } from './export-png.js?v=20260908b';
+import { copyPermalink, readUrlState, resetToDefaults, startPermalink } from './permalink.js?v=20260908b';
 
 const $ = s => document.querySelector(s);
 const VIEWS = { atlas: AtlasView, evidence: EvidenceView, trend: TrendView, bilateral: BilateralView };

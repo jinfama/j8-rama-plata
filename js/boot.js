@@ -7,8 +7,8 @@
 //  the fresco fallback and the "Entrar al atlas" button that booted the app —
 //  was removed on 2026-09-06; only the boot survives, and it runs by itself.
 // ════════════════════════════════════════════════════════════════
-import Data from './data-loader.js?v=20260906m';
-import App from './app.js?v=20260906m';
+import Data from './data-loader.js?v=20260908b';
+import App from './app.js?v=20260908b';
 
 // Read before anything runs: App.init() ends in startPermalink(), which rewrites
 // the address bar from the state and drops any parameter it does not own.

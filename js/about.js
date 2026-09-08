@@ -1,5 +1,5 @@
 // ════════ Acerca / metodología ════════
-import { OLIVE_BRANCH } from './utils.js?v=20260906m';
+import { OLIVE_BRANCH } from './utils.js?v=20260908b';
 
 export function renderAbout(el) {
   el.innerHTML = `

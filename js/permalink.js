@@ -5,7 +5,7 @@
 // the world map of the default year. Only values that differ from the defaults
 // are written, so the plain entry URL stays clean.
 
-import { State } from './state.js?v=20260906m';
+import { State } from './state.js?v=20260908b';
 
 // Snapshot taken at import time, before any view can touch the state.
 const DEFAULTS = { ...State.all() };

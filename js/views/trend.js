@@ -1,10 +1,10 @@
 // ════════ Tendencias mundiales — WHEP balanced ════════
-import { State } from '../state.js?v=20260906m';
-import Data from '../data-loader.js?v=20260906m';
+import { State } from '../state.js?v=20260908b';
+import Data from '../data-loader.js?v=20260908b';
 import { ICONS, SEQ_COLORS, AEGEAN_COLORS, seqScale, scaleTicks, fmt, fmtUnit, NODATA, LAND_BG, ZERO_COL,
-         coverageByYear, coverageThreshold, firstCoveredYear } from '../utils.js?v=20260906m';
-import { mapSetup, sizeOf, fitProjection, observeResize, renderLegend, noAntarctica } from '../mapkit.js?v=20260906m';
-import { showTip, hideTip } from '../tip.js?v=20260906m';
+         coverageByYear, coverageThreshold, firstCoveredYear } from '../utils.js?v=20260908b';
+import { mapSetup, sizeOf, fitProjection, observeResize, renderLegend, noAntarctica } from '../mapkit.js?v=20260908b';
+import { showTip, hideTip } from '../tip.js?v=20260908b';
 
 let T, G, SVG, ZOOM, domainCache = {};
 
@@ -149,7 +149,7 @@ const V = {
       .filter(r => r.v != null && r.v > 0).sort((a, b) => b.v - a.v).slice(0, 18);
     const max = rows.length ? rows[0].v : 1;
     body.innerHTML = rows.length ? rows.map((r, i) =>
-      `<div class="rank-row"><span class="rank-num">${i + 1}</span><div class="rank-body"><div class="rank-name">${r.name}</div><div class="rank-bar" style="width:${Math.max(4, r.v / max * 100)}%;background:${this._isTrade(ind) ? 'var(--aegean)' : 'var(--gold)'}"></div></div><span class="rank-val">${fmt(r.v)}</span></div>`
+      `<div class="rank-row"><span class="rank-num">${i + 1}</span><div class="rank-body"><div class="rank-name">${r.name}</div><div class="rank-bar" style="width:${Math.max(4, r.v / max * 100)}%;background:${this._isTrade(ind) ? 'var(--sepia)' : 'var(--gold)'}"></div></div><span class="rank-val">${fmt(r.v)}</span></div>`
     ).join('') : '<p style="color:var(--ink-3);font-size:12px">Sin datos.</p>';
   },
   /* CSV of what the map is showing: every territory painted this year, with its

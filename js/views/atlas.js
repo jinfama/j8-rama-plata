@@ -1,10 +1,10 @@
 // ════════ Atlas subnacional — olivar 01_tabular ════════
-import { State } from '../state.js?v=20260906m';
-import Data from '../data-loader.js?v=20260906m';
+import { State } from '../state.js?v=20260908b';
+import Data from '../data-loader.js?v=20260908b';
 import { ICONS, seqScale, scaleTicks, fmt, fmtUnit, NODATA, LAND_BG, ZERO_COL,
-         coverageByYear, coverageThreshold, firstCoveredYear } from '../utils.js?v=20260906m';
-import { mapSetup, sizeOf, fitProjection, observeResize, renderLegend, noAntarctica } from '../mapkit.js?v=20260906m';
-import { showTip, hideTip } from '../tip.js?v=20260906m';
+         coverageByYear, coverageThreshold, firstCoveredYear } from '../utils.js?v=20260908b';
+import { mapSetup, sizeOf, fitProjection, observeResize, renderLegend, noAntarctica } from '../mapkit.js?v=20260908b';
+import { showTip, hideTip } from '../tip.js?v=20260908b';
 
 const SCALES = {
   world: { label: 'Mundo · regiones', geoType: 'robinson', name: 'id', pad: 8 },

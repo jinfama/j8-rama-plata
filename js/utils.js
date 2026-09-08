@@ -4,17 +4,18 @@
 
 /* ── Data ramps — revised 2026-09-06 (see CLAUDE.md, "Escalas de mapa") ─────
    Built on an even CIELAB lightness ladder (L* 86 → 18, steps of 8.4–8.6 ΔL*)
-   inside the gamut of the approved cover V5_mancha-de-aceite: its oil stain is
-   rgb(150,106,20) (L*48 h78) and its grove is #4F7A2A / #3C4A1C / #28311D, so
-   the ramp walks parchment → oil → grove without ever entering the amphora
-   accent --terra #B05620 (closest approach dE2000 = 20.9, so a datum can never
-   be read as a button). Neighbouring stops are ≥ 6.8 dE2000 apart under normal
+   inside the gamut of the cover: its oil runs from pale gold #F2D468 through
+   amber #C9A227 to olive #6B6A2A / #4E4A1C and the ink is #33351F, so the ramp
+   walks parchment → oil → olive → ink (2026-09-08: the three darkest stops
+   moved from the old leaf-green grove to the olive-ink hue of the V7 cover,
+   same lightness, so the ladder still discriminates). It never enters the
+   amber accent --terra #83630F in a way a datum could be read as a button. Neighbouring stops are ≥ 6.8 dE2000 apart under normal
    vision, deuteranopia AND protanopia. Do not hand-edit a stop: the ladder is
    what makes the map discriminate. */
 // Sequential: parchment → oil-gold → olive → deep grove
 export const SEQ_COLORS = [
   '#E3D7B2', '#D8BD81', '#CBA357', '#B88B38',
-  '#957A29', '#6D6A24', '#4D5822', '#38441F', '#26301A'
+  '#957A29', '#6D6A24', '#4F4E22', '#3B3A1C', '#2A2A16'
 ];
 /* Diverging: oil-gold (deficit) → parchment → Aegean (surplus). No user in the
    code today; kept correct so the next one does not inherit a broken axis.
@@ -26,11 +27,15 @@ export const DIV_COLORS = [
   '#5B430F', '#967120', '#C5AE7A', '#E4DFD2',
   '#85B8CD', '#0080AC', '#054C6C'
 ];
-/* Aegean sequential (trade): the sea, not the grove. Same lightness ladder,
-   hue 214°→274°, muted toward the cover's own sea rgb(124,150,137). */
+/* Trade sequential — SEPIA since 2026-09-08 (the export keeps its old name so
+   trend.js needs no change). The V7 cover has no blue anywhere: parchment,
+   sepia land, oil. Trade is the ink of the ledgers, so its ramp walks the same
+   lightness ladder as SEQ_COLORS (L* ~ 86 -> 16) on the sepia hue (h ~ 40-50 deg),
+   which keeps it separable from the oil/olive ramp of production by hue and
+   never approaches the amber accent --terra #83630F in the dark half. */
 export const AEGEAN_COLORS = [
-  '#BDD6DB', '#98C2CD', '#73ADC1', '#5098B4',
-  '#2B83A7', '#196C94', '#15577D', '#164265', '#152E4B'
+  '#E2D5C0', '#D0BC9E', '#BCA27E', '#A88962',
+  '#927148', '#7A5B36', '#614628', '#48331C', '#312211'
 ];
 
 const NF = new Intl.NumberFormat('es-ES');

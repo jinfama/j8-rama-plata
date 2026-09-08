@@ -1,13 +1,15 @@
 // ════════ Flujos bilaterales — Comtrade DB3 ════════
-import { State } from '../state.js?v=20260906m';
-import Data from '../data-loader.js?v=20260906m';
-import { ICONS, fmt } from '../utils.js?v=20260906m';
-import { mapSetup, sizeOf, fitProjection, observeResize, noAntarctica } from '../mapkit.js?v=20260906m';
-import { showTip, hideTip } from '../tip.js?v=20260906m';
+import { State } from '../state.js?v=20260908b';
+import Data from '../data-loader.js?v=20260908b';
+import { ICONS, fmt } from '../utils.js?v=20260908b';
+import { mapSetup, sizeOf, fitProjection, observeResize, noAntarctica } from '../mapkit.js?v=20260908b';
+import { showTip, hideTip } from '../tip.js?v=20260908b';
 
 let B, G, SVG, ZOOM, GEO, FEATS, CENTROID = {}, PROJ, PATH, countryList = [];
 const MET = { v: { label: 'Valor', unit: 'USD', pre: '$ ', suf: '' }, w: { label: 'Volumen', unit: 't', pre: '', suf: ' t' } };
 const fmtM = (x, m) => MET[m].pre + fmt(x) + MET[m].suf;
+// Role colours, map and ranking alike: exporter = the cover's amber, importer = dark sepia.
+const EXP_COL = 'var(--terra)', IMP_COL = 'var(--sepia-dk)';
 // Snapshot taken at import time, before the permalink can patch the state:
 // the item an unknown ?item= falls back to (same trick as permalink.js).
 // Object.keys() would not do: numeric-looking keys come out sorted, so the
@@ -117,7 +119,13 @@ const V = {
     // node totals (the "other" endpoint)
     const recv = {}; flows.forEach(f => { const k = dir === 'import' ? f.exn : f.imn; recv[k] = (recv[k] || 0) + f[met]; });
     const focusNodes = new Set(flows.map(f => dir === 'import' ? f.imn : f.exn)); // highlighted country side
-    const ribbonColor = dir === 'import' ? 'var(--aegean)' : 'var(--gold)';
+    /* Ribbons: exports are the oil (gold); imports are the ledger (sepia).
+       Nodes are coloured by ROLE, the same in both directions: an exporter is
+       amber (the cover's accent), an importer dark sepia. Until 2026-09-08 the
+       import view painted both ends terracotta and the legend said otherwise. */
+    const ribbonColor = dir === 'import' ? 'var(--sepia)' : 'var(--gold)';
+    const otherCol = dir === 'import' ? EXP_COL : IMP_COL;   // the far end of each ribbon
+    const focusCol = dir === 'import' ? IMP_COL : EXP_COL;   // the country the view is about
 
     G.selectAll('*').remove();
     G.append('path').datum({ type: 'FeatureCollection', features: FEATS }).attr('d', PATH)
@@ -138,12 +146,12 @@ const V = {
     Object.entries(recv).forEach(([name, v]) => {
       const p = PROJ(CENTROID[name]); if (!p) return;
       gN.append('circle').attr('cx', p[0]).attr('cy', p[1]).attr('r', Math.max(2.4, Math.min(11, Math.sqrt(v / maxV) * 13)))
-        .attr('fill', dir === 'import' ? 'var(--terra)' : 'var(--aegean)').attr('fill-opacity', .8).attr('stroke', 'var(--paper)').attr('stroke-width', 1)
+        .attr('fill', otherCol).attr('fill-opacity', .8).attr('stroke', 'var(--paper)').attr('stroke-width', 1)
         .on('mousemove', e => showTip(e, { title: name, val: fmtM(v, met), sub: dir === 'import' ? 'exporta hacia el país' : 'importaciones recibidas' })).on('mouseleave', hideTip);
     });
     focusNodes.forEach(name => {
       const p = PROJ(CENTROID[name]); if (!p) return;
-      gN.append('circle').attr('class', 'bi-src').attr('cx', p[0]).attr('cy', p[1]).attr('r', 4.6);
+      gN.append('circle').attr('class', 'bi-src').attr('cx', p[0]).attr('cy', p[1]).attr('r', 4.6).attr('fill', focusCol);
       if (country !== 'all') gN.append('text').attr('class', 'bi-label').attr('x', p[0] + 6).attr('y', p[1] + 3).text(name);
     });
 
@@ -151,7 +159,7 @@ const V = {
       `<div class="legend-title">${dir === 'import' ? 'Importaciones' : 'Exportaciones'} de ${B.meta.items[State.get('biItem')]} · ${State.get('year')}</div>` +
       // Los dos puntos redondos son la leyenda de los nodos redondos del mapa:
       // excepción consciente a los bordes cuadrados.
-      `<div class="legend-foot"><span style="width:11px;height:11px;border-radius:50%;background:var(--terra);display:inline-block"></span> ${dir === 'import' ? 'importador' : 'exportador'} &nbsp; <span style="width:11px;height:11px;border-radius:50%;background:var(--aegean);display:inline-block"></span> ${dir === 'import' ? 'exportador' : 'importador'}</div>` +
+      `<div class="legend-foot"><span style="width:11px;height:11px;border-radius:50%;background:${EXP_COL};display:inline-block"></span> exportador &nbsp; <span style="width:11px;height:11px;border-radius:50%;background:${IMP_COL};display:inline-block"></span> importador</div>` +
       `<div class="legend-foot">Grosor ∝ ${MET[met].label.toLowerCase()} (${MET[met].unit})</div>`;
   },
 
@@ -163,7 +171,7 @@ const V = {
       head.innerHTML = `<h3>Mayores ${dir === 'import' ? 'importadores' : 'exportadores'}</h3><p>${B.meta.items[item]} · ${MET[met].label} · ${y}</p>`;
       const rows = (tot ? tot[key] : []).slice().sort((a, b) => b[idx] - a[idx]).slice(0, 16);
       const max = rows.length ? rows[0][idx] : 1;
-      body.innerHTML = rows.map((r, i) => `<div class="rank-row"><span class="rank-num">${i + 1}</span><div class="rank-body"><div class="rank-name">${r[1]}</div><div class="rank-bar" style="width:${Math.max(4, r[idx] / max * 100)}%;background:var(--terra)"></div></div><span class="rank-val">${fmtM(r[idx], met)}</span></div>`).join('');
+      body.innerHTML = rows.map((r, i) => `<div class="rank-row"><span class="rank-num">${i + 1}</span><div class="rank-body"><div class="rank-name">${r[1]}</div><div class="rank-bar" style="width:${Math.max(4, r[idx] / max * 100)}%;background:${dir === 'import' ? IMP_COL : EXP_COL}"></div></div><span class="rank-val">${fmtM(r[idx], met)}</span></div>`).join('');
     } else {
       const flows = this._flows();
       const name = (dir === 'import' ? flows[0]?.imn : flows[0]?.exn) || countryList.find(e => e.iso === country)?.name || country;
@@ -171,7 +179,7 @@ const V = {
       const max = flows.length ? flows[0][met] : 1;
       body.innerHTML = flows.length ? flows.map((f, i) => {
         const other = dir === 'import' ? f.exn : f.imn;
-        return `<div class="rank-row"><span class="rank-num">${i + 1}</span><div class="rank-body"><div class="rank-name">${other}</div><div class="rank-bar" style="width:${Math.max(4, f[met] / max * 100)}%;background:var(--aegean)"></div></div><span class="rank-val">${fmtM(f[met], met)}</span></div>`;
+        return `<div class="rank-row"><span class="rank-num">${i + 1}</span><div class="rank-body"><div class="rank-name">${other}</div><div class="rank-bar" style="width:${Math.max(4, f[met] / max * 100)}%;background:${dir === 'import' ? EXP_COL : IMP_COL}"></div></div><span class="rank-val">${fmtM(f[met], met)}</span></div>`;
       }).join('') : '<p style="color:var(--ink-3);font-size:12px">Sin flujos registrados este año.</p>';
     }
   },

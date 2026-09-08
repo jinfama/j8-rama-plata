@@ -6,11 +6,11 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <title>Minerva · Historia del olivar</title>
 <meta name="description" content="Atlas interactivo de la historia del olivar: evidencia arqueológica, series subnacionales, tendencias mundiales y comercio del aceite de oliva.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%231C2A17'/%3E%3Cpath d='M12 4c-3 3-3 8 0 14 3-6 3-11 0-14z' fill='%23C9A227'/%3E%3Cpath d='M12 18c2-2 5-2 7-1' stroke='%238CA35A' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%2333351F'/%3E%3Cpath d='M12 4c-3 3-3 8 0 14 3-6 3-11 0-14z' fill='%23C9A227'/%3E%3Cpath d='M12 18c2-2 5-2 7-1' stroke='%239A9552' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=20260906m">
+<link rel="stylesheet" href="css/styles.css?v=20260908b">
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3-geo-projection@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
@@ -23,15 +23,15 @@
   if (location.protocol !== 'file:') return;
   window.addEventListener('DOMContentLoaded', function () {
     var o = document.createElement('div');
-    o.style.cssText = 'position:fixed;inset:0;z-index:9000;display:grid;place-items:center;background:linear-gradient(150deg,#0B0E07,#12160C);color:#F4ECD9;font-family:Alegreya Sans,system-ui,sans-serif;text-align:center;padding:32px';
+    o.style.cssText = 'position:fixed;inset:0;z-index:9000;display:grid;place-items:center;background:#F3EEE2;color:#33351F;font-family:Alegreya Sans,system-ui,sans-serif;text-align:center;padding:32px';
     o.innerHTML = '<div style="max-width:520px">' +
-      '<div style="font-family:Bodoni Moda,Georgia,serif;font-size:42px;color:#EFDDA0;margin-bottom:6px">Minerva</div>' +
-      '<div style="letter-spacing:3px;text-transform:uppercase;font-size:11px;color:rgba(228,197,106,.7);margin-bottom:22px">Historia del olivar</div>' +
-      '<p style="line-height:1.6;color:#D9CBA8">Este atlas necesita un <b>servidor local</b>: los navegadores bloquean los módulos y los datos cuando se abre el archivo directamente (<code>file://</code>).</p>' +
-      '<p style="margin-top:16px;line-height:1.7;color:#D9CBA8">Ábrelo con un doble clic en <b style="color:#EFDDA0">abrir_minerva.bat</b><br>' +
-      '<span style="color:#9A8B62;font-size:13px">o, en una terminal dentro de esta carpeta:</span><br>' +
-      '<code style="display:inline-block;margin-top:6px;background:rgba(228,197,106,.12);padding:6px 12px;border-radius:0;color:#EFDDA0">python -m http.server 8848</code><br>' +
-      '<span style="color:#9A8B62;font-size:13px">y visita</span> <code style="color:#EFDDA0">http://127.0.0.1:8848</code></p>' +
+      '<div style="font-family:Bodoni Moda,Georgia,serif;font-size:42px;color:#33351F;margin-bottom:6px">Minerva</div>' +
+      '<div style="letter-spacing:3px;text-transform:uppercase;font-size:11px;color:#6B6A2A;margin-bottom:22px">Historia del olivar</div>' +
+      '<p style="line-height:1.6;color:#4F5136">Este atlas necesita un <b>servidor local</b>: los navegadores bloquean los módulos y los datos cuando se abre el archivo directamente (<code>file://</code>).</p>' +
+      '<p style="margin-top:16px;line-height:1.7;color:#4F5136">Ábrelo con un doble clic en <b style="color:#83630F">abrir_minerva.bat</b><br>' +
+      '<span style="color:#62634A;font-size:13px">o, en una terminal dentro de esta carpeta:</span><br>' +
+      '<code style="display:inline-block;margin-top:6px;background:rgba(201,162,39,.16);padding:6px 12px;border-radius:0;color:#66500A">python -m http.server 8848</code><br>' +
+      '<span style="color:#62634A;font-size:13px">y visita</span> <code style="color:#66500A">http://127.0.0.1:8848</code></p>' +
       '</div>';
     document.body.appendChild(o);
   });
@@ -150,6 +150,6 @@
   </aside>
 </div>
 
-<script type="module" src="js/boot.js?v=20260906m"></script>
+<script type="module" src="js/boot.js?v=20260908b"></script>
 </body>
 </html>

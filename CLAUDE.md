@@ -4,10 +4,12 @@ Visor hermano de `web_latam` (mismo stack).
 
 ## Dónde se entra y dónde vive la aplicación  (2026-09-06)
 
-**`index.html` es la PORTADA**, no la aplicación: es la portada aprobada
-`V5_mancha-de-aceite` copiada dentro del visor, con `<meta robots noindex>` y sus
-kits de datos en `portada/` (`minerva-evidence.js`). Sus cinco enlaces entran cada
-uno por su figura:
+**`index.html` es la PORTADA**, no la aplicación: desde el 2026-09-08 (noche) es
+la V7 «el aceite se derrama» —una sola escena, sin histograma ni leyenda ni
+contadores—, con `<meta robots noindex>` y sus kits de datos en `portada/`
+(`minerva-ev6.js` + `minerva-ev6-sites.js`, generados por
+`build/portada_kit_v6.py`; `minerva-evidence.js` es el kit de la V5 y ya no se
+carga). Sus cinco enlaces entran cada uno por su figura:
 
 | enlace de la portada | destino |
 |---|---|
@@ -40,33 +42,54 @@ Reglas al tocar esto:
 
 ## Paleta y estética — la portada manda
 
-El visor sigue la portada aprobada
-**`07_temp/portadas_visores_2026-09/minerva/V5_mancha-de-aceite.html`**
-(pase de cromo del 2026-09-06; antes seguía la V3, que solo aportó color).
-Si esa portada cambia, esto es lo que hay que volver a mirar.
+**Regla (2026-09-08, ronda V7): la paleta del interior es la de la portada.**
+El visor sigue la portada **`index.html` V7 «el aceite se derrama»** (mapa del
+Mediterráneo a sangre sobre pergamino, aceite real que se derrama desde los
+hallazgos, glifos-medallón). Juan descartó el verde de hoja y el naranja de
+ánfora de las V5/V6 («ese verde con naranja no sé si pega bien»); si la portada
+vuelve a cambiar, lo primero que hay que volver a mirar es `:root` de
+`css/styles.css`, que copia sus tokens. Las V5/V6 quedan en
+`C:/Work/scratch/checkpoint/visores_2026-09/web_minerva_backup/index.html.20260908.bak`
+(V5) y `index.html.20260908-v6.bak` (V6); los ficheros del interior anteriores
+al cambio de paleta, en `*.20260908-v7.bak` de la misma carpeta.
 
-**Cromo** (tokens en `:root` de `css/styles.css`):
+**Cromo** (tokens en `:root` de `css/styles.css`, copiados del `:root` de `index.html`):
 
-| papel | tinta | hoja | oliva osc. | ánfora (acento) | ánfora osc. |
-|---|---|---|---|---|---|
-| `#F2EEE1` / `#F9F6EC` | `#28311D` | `#4F7A2A` | `#3C4A1C` | `#B05620` | `#8A3F16` |
+| papel | tinta | sepia | oliva | oliva osc. | aceite / oro | acento (ámbar osc.) |
+|---|---|---|---|---|---|---|
+| `#F3EEE2` / `#FAF6EA` | `#33351F` | `#8B7355` / `#5F4D33` | `#6B6A2A` | `#4E4A1C` | `#C9A227` / `#E6C65A` | `#83630F` / `#66500A` |
 
-Filetes = tinta al 22 % (`--border-lt`) y al 44 % (`--border`). Texto secundario
-`--ink-2 #4C5738`, terciario `--ink-3 #5F6650` (subido desde `#7D8664`, que se
-quedaba en 3,3–3,5:1 sobre el papel; ahora 5,2–5,5:1).
+Texto secundario `--ink-2 #4F5136` (7,1:1 sobre el marfil), terciario
+`--ink-3 #62634A` (5,3:1). Los nombres de token `--terra` y `--aegean` **se
+conservan** para no tocar las vistas: `--terra` ES ahora el acento ámbar y
+`--aegean` (`#6E5A2E`) ES el sepia de los enlaces.
 
 **Cómo se reparte el color** — la regla que hay que respetar al añadir piezas:
-- **ánfora `--terra`** = interacción: hover, pestaña activa, barra de la vista
-  activa en la barra lateral, filetes superiores de fichas, foco de teclado
-  (`:focus-visible{outline:2px solid var(--terra)}`).
-- **hoja `--olive`** = marcas calladas: filetes de cita, rama del «Acerca»,
-  la cursiva del título del «Acerca».
-- **oro `--gold`** = **el aceite, o sea, el dato** (la portada pinta su mancha en
-  `rgb(150,106,20)`). Sobrevive solo en marcas que llevan un valor: cintas del
-  comercio bilateral, barras de ranking, barras de magnitud, la etiqueta «valor».
-  **No usar oro para cromo.**
-- La barra lateral, el pie y las pastillas activas son fondo `--rail #1C2A17` con
-  tinta crema (`--rail-ink-2`, crema al 62 %: 5,9:1) — no dorada.
+- **ámbar `--terra`** = interacción: hover, pestaña activa, filetes superiores
+  de fichas, foco de teclado (`:focus-visible{outline:2px solid var(--terra)}`).
+  La barra de la vista activa en la barra lateral es **oro** (`--gold`): el
+  aceite marca la sección.
+- **oliva `--olive`** = marcas calladas: filetes de cita, rama del «Acerca»,
+  la cursiva del título del «Acerca», el tramo recorrido de la línea de tiempo
+  (`.tl-fill`: oro → oliva) y su asa.
+- **oro `--gold`** = **el aceite, o sea, el dato**. Sobrevive solo en marcas
+  que llevan un valor: cintas de exportación, barras de ranking, barras de
+  magnitud, la etiqueta «valor». **No usar oro para cromo.**
+- **sepia** = la tinta de los libros de cuentas: cintas de importación, rampa
+  de comercio en Tendencias (`AEGEAN_COLORS`, que ya no es egea), enlaces.
+- La barra lateral, el pie y las pastillas activas son fondo `--rail #33351F`
+  (la tinta de la portada) con crema (`--rail-ink-2`, crema al 66 %: 5,7:1).
+- **Sin azul y sin naranja en el cromo.** Los únicos colores fuera de la
+  familia son de estado o de categoría: vino `#7A2A3A` para «fiabilidad baja»
+  y los trece tonos de tipo de evidencia (abajo).
+
+**Tipos de evidencia (13 colores)**: `data/evidence.json` sigue trayendo los
+tonos de la identidad anterior (hoja `#6B8C32`, naranja `#B85C20`…); **no se
+toca `data/`**. `js/views/evidence.js` los sobreescribe en memoria al cargar
+(`TYPE_INK`), solo el color: apagados y terrosos, trece matices distintos. El
+texto escrito EN un color de tipo (`.ev-card-type`, glifos de la tabla) pasa
+por `inkFor()` (oscurece los claros) y el texto SOBRE él (`.ev-d-badge`) por
+`inkOn()` (tinta oscura sobre el oro), para quedarse por encima de 4,5:1.
 
 **Tipografía** (misma hoja de Google Fonts, una sola petición):
 **Bodoni Moda** (display: títulos, cifras grandes, el año de la línea de tiempo en
@@ -161,17 +184,15 @@ reales de la página servida); como sigue por debajo del 4,5:1 de la WCAG para
 10,5 px, la cifra lleva además halo del color contrario (`.mx-val`,
 `paint-order:stroke`), que es lo que la separa del fondo.
 
-**Lo que NO se consiguió, y por qué.** El tipo «Ánforas» de la capa Evidencia
-está pintado en `#B85C20`, a **2,70 dE2000 del acento de interacción**
-`--terra #B05620`: la segunda categoría más numerosa (1.916 puntos) lleva el
-color de «hover / pestaña activa / foco». No se cambió porque esos trece colores
-**son los de la portada aprobada**, salen de `data/evidence.json` (que se
-regenera desde `build/`) y los repite `portada/minerva-evidence.js`, o sea que
-moverlo obliga a tocar los tres sitios y a re-aprobar la portada. Si se decide
-cambiarlo, el arreglo mínimo es llevar Ánforas a un ladrillo más profundo
-(h≈40°, L\*≈42) y sincronizar los tres ficheros. Bajo deuteranopia quedan además
-dos pares por debajo de 5 dE entre los trece tipos —Genética~Isótopos (2,6) y
-Polen~Ánforas (3,6)—, por la misma razón: son los tonos de la portada.
+**Resuelto el 2026-09-08 (V7).** El tipo «Ánforas» estaba pintado en `#B85C20`,
+a 2,70 dE2000 del antiguo acento naranja. Con la portada V7 el acento es ámbar
+oscuro y los trece tipos se sobreescriben en memoria (`TYPE_INK` en
+`js/views/evidence.js`): Ánforas es ahora un siena apagado `#9A4F2C`, lejos del
+acento. La medida de daltonismo de los trece tipos **no se ha repetido** con
+la paleta nueva; si alguien la repite, que anote aquí el resultado. Las rampas
+secuenciales sí se movieron sin romper la escalera: los tres escalones oscuros
+de `SEQ_COLORS` pasaron del verde de bosque al oliva-tinta con la misma
+claridad, y `AEGEAN_COLORS` es una escalera sepia con las mismas L\*.
 
 **Dos cosas que la paleta no puede arreglar, y que son de datos, no de color.**
 1. *El dominio lo fija un valor atípico.* `seqScale` toma el mínimo y el máximo

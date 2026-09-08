@@ -1,10 +1,10 @@
 // ════════ Evidencia arqueológica — olivar 02_evidence ════════
 // Four sub-tabs: map · region × period · type × region · sources & QA.
-import { State } from '../state.js?v=20260906m';
-import Data from '../data-loader.js?v=20260906m';
-import { ICONS, fmtYear, SEQ_COLORS } from '../utils.js?v=20260906m';
-import { mapSetup, sizeOf, fitProjection, observeResize, noAntarctica } from '../mapkit.js?v=20260906m';
-import { showTip, hideTip } from '../tip.js?v=20260906m';
+import { State } from '../state.js?v=20260908b';
+import Data from '../data-loader.js?v=20260908b';
+import { ICONS, fmtYear, SEQ_COLORS } from '../utils.js?v=20260908b';
+import { mapSetup, sizeOf, fitProjection, observeResize, noAntarctica } from '../mapkit.js?v=20260908b';
+import { showTip, hideTip } from '../tip.js?v=20260908b';
 
 let E, G, SVG, ZOOM, GEO, TYPES, PROJ;
 let ACTIVE = null;              // Set of active types (module-level — NOT in State: Set breaks JSON diff)
@@ -87,13 +87,33 @@ function macroOf(c) { return !c ? 'Sin país' : (ISO3_MACRO[c] || 'Otros'); }
    2,52:1 a 3,55:1. Como 3,55 sigue por debajo del 4,5:1 de la WCAG para un
    cuerpo de 10,5 px, la cifra lleva además un halo del color contrario
    (.mx-val en styles.css), que es lo que la separa del fondo de la celda. */
+const TYPE_INK = {
+  pollen: '#6F7D26', amphora: '#9A4F2C', olive_press: '#5A4030', macroremains: '#8F6530',
+  literary: '#3E5C80', epigraphy: '#6A4878', genetic: '#2A6F63', isotope: '#A33C58',
+  iconography: '#C9A227', modern_landuse: '#4C7D4E', land_register: '#7D6A4E',
+  ethnographic: '#9E6478', remote_sensing: '#4B8195',
+};
+/* Text set IN a type colour (card label) or ON it (detail badge) has to pass
+   4,5:1: the gold of iconography is too light for white and too light to be
+   read on cream, so light hues get a darkened ink for text and a dark ink on
+   the badge. lum() is the sRGB relative luminance of WCAG. */
+function lum(hex) {
+  const c = hex.replace('#', ''); const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  return 0.2126 * f(parseInt(c.slice(0, 2), 16)) + 0.7152 * f(parseInt(c.slice(2, 4), 16)) + 0.0722 * f(parseInt(c.slice(4, 6), 16));
+}
+function inkFor(hex) {           // the type colour as TEXT on cream
+  if (lum(hex) < 0.17) return hex;
+  const c = hex.replace('#', ''); const k = 0.62;
+  return '#' + [0, 2, 4].map(i => Math.round(parseInt(c.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('');
+}
+function inkOn(hex) { return lum(hex) > 0.20 ? '#33351F' : '#FBF6EA'; }   // text ON the type colour
 const RAMP = SEQ_COLORS;
 const cScale = d3.scaleSequential(d3.interpolateRgbBasis(RAMP));
 const CELL_INK_T = 0.45;
 function cellFill(v, max) { return v ? cScale(Math.sqrt(v / max)) : 'var(--cream-2)'; }
 function cellDark(v, max) { return !!v && Math.sqrt(v / max) > CELL_INK_T; }
-function cellInk(v, max) { return cellDark(v, max) ? '#F9F6EC' : '#28311D'; }
-function cellHalo(v, max) { return cellDark(v, max) ? 'rgba(40,49,29,.55)' : 'rgba(249,246,236,.75)'; }
+function cellInk(v, max) { return cellDark(v, max) ? '#FAF6EA' : '#33351F'; }
+function cellHalo(v, max) { return cellDark(v, max) ? 'rgba(51,53,31,.55)' : 'rgba(250,246,234,.75)'; }
 
 const V = {
   navLabel: 'Evidencia', icon: ICONS.evidence, usesTimeline: false, usesRail: false,
@@ -106,6 +126,11 @@ const V = {
     E = await Data.evidence();
     document.querySelector('#loading')?.classList.add('gone');
     TYPES = E.meta.types;
+    /* Colour of each kind of evidence: the cover's family (2026-09-08). The
+       thirteen hues in data/evidence.json are the old identity (leaf green,
+       amphora orange); data/ is not touched, the colour is overridden here,
+       in memory, and only the colour. Muted, earthy, thirteen hues apart. */
+    for (const k in TYPE_INK) if (TYPES[k]) TYPES[k].color = TYPE_INK[k];
     ACTIVE = new Set(Object.keys(TYPES));
     GEO = await Data.geo('geo_world.json');
     const m = mapSetup('#ev-svg'); SVG = m.svg; G = m.g; ZOOM = m.zoom;
@@ -428,15 +453,15 @@ const V = {
     const card = (v, l) => `<div class="ev-kpi"><b>${v}</b><span>${l}</span></div>`;
     const CONF_LBL = { high: 'Alta', medium: 'Media', low: 'Baja', otra: 'Sin declarar' };
     /* Verde / ámbar / rojo es la trampa clásica del daltonismo: alta y baja
-       quedaban a 5,5 dE2000 bajo deuteranopia. Hoja / oro / vino / gris mantiene
-       las cuatro clases separadas (peor par 16,2 dE bajo deuteranopia, 18,3 bajo
-       protanopia) y ninguno de los cuatro es el acento --terra. (2026-09-06) */
-    const CONF_COL = { high: '#4F7A2A', medium: '#C9A227', low: '#7A2A3A', otra: '#9A968A' };
+       quedaban a 5,5 dE2000 bajo deuteranopia. Oliva / oro / vino / gris (la
+       hoja verde pasó a oliva el 2026-09-08 con la portada V7) mantiene las
+       cuatro clases separadas por claridad y ninguno es el acento --terra. */
+    const CONF_COL = { high: '#6B6A2A', medium: '#C9A227', low: '#7A2A3A', otra: '#9A968A' };
     /* El rótulo dentro del segmento tiene que leerse SOBRE SU segmento: en crema
        sobre el oro daba 2,24:1 medido en pantalla. Tinta oscura en los claros,
        crema en los oscuros: 2,24:1 -> 5,61:1 medido sobre pixeles reales (el
        segmento verde de "alta" se queda en 4,69:1, que ya pasaba). */
-    const CONF_INK = { high: '#FBF6EA', medium: '#28311D', low: '#FBF6EA', otra: '#28311D' };
+    const CONF_INK = { high: '#FBF6EA', medium: '#33351F', low: '#FBF6EA', otra: '#33351F' };
     const CONF_SHADOW = { high: '0 1px 2px rgba(0,0,0,.25)', medium: '0 1px 1px rgba(255,252,240,.45)',
                           low: '0 1px 2px rgba(0,0,0,.25)', otra: '0 1px 1px rgba(255,252,240,.45)' };
     const FLAGS = [
@@ -521,7 +546,7 @@ const V = {
     else rows = rows.slice().sort((a, b) => b.n - a.n);
     const nmax = AGG.sources[0] ? AGG.sources[0].n : 1;
     const yr = v => (v == null ? '—' : fmtYear(v));
-    const CONF_COL = { high: '#4F7A2A', medium: '#C9A227', low: '#7A2A3A', otra: '#9A968A' };
+    const CONF_COL = { high: '#6B6A2A', medium: '#C9A227', low: '#7A2A3A', otra: '#9A968A' };
     const link = s => {
       const out = [];
       if (s.topDoi) out.push(`<a href="https://doi.org/${esc(String(s.topDoi).replace(/^https?:\/\/(dx\.)?doi\.org\//i, ''))}" target="_blank" rel="noopener">DOI</a>`);
@@ -538,7 +563,7 @@ const V = {
         return `<tr>
           <td class="src">${esc(s.tag)}</td>
           <td class="num"><span class="nbar"><i style="width:${Math.max(2, 100 * s.n / nmax)}%"></i></span>${s.n.toLocaleString('es-ES')}</td>
-          <td class="tks">${tks.map(([t, c]) => `<span class="tk" style="color:${TYPES[t] ? TYPES[t].color : '#8A7A3A'}" title="${esc(TYPES[t] ? TYPES[t].label : t)}: ${c}">${TYPES[t] ? TYPES[t].glyph : '•'}</span>`).join('')}</td>
+          <td class="tks">${tks.map(([t, c]) => `<span class="tk" style="color:${TYPES[t] ? inkFor(TYPES[t].color) : '#8A7A3A'}" title="${esc(TYPES[t] ? TYPES[t].label : t)}: ${c}">${TYPES[t] ? TYPES[t].glyph : '•'}</span>`).join('')}</td>
           <td class="yrs">${yr(s.d0)}${s.d1 != null && s.d1 !== s.d0 ? ' – ' + yr(s.d1) : ''}</td>
           <td class="conf"><span class="cbar">${segs}</span></td>
           <td class="lnk">${link(s)}</td>
@@ -549,7 +574,7 @@ const V = {
     document.querySelector('#qa-tbl-foot').innerHTML =
       `${rows.length.toLocaleString('es-ES')} de ${AGG.sources.length.toLocaleString('es-ES')} fuentes · `
       + `${shown.toLocaleString('es-ES')} de ${AGG.mapped.toLocaleString('es-ES')} registros cartografiables · `
-      + 'fiabilidad: <b style="color:#3C4A1C">alta</b> · <b style="color:#7A5F10">media</b> · <b style="color:#6B2432">baja</b>';
+      + 'fiabilidad: <b style="color:#4E4A1C">alta</b> · <b style="color:#7A5F10">media</b> · <b style="color:#6B2432">baja</b>';
   },
 
   // ─────────────── generic SVG matrix ───────────────
@@ -687,7 +712,7 @@ const V = {
       p.v != null ? `<span class="ev-tag val">${fmtV(p.v)}${p.u ? ' ' + esc(p.u) : ''}</span>` : '',
     ].join('');
     return `<article class="ev-card" data-i="${idx}" style="border-left-color:${t.color}">
-      <div class="ev-card-top"><span class="ev-card-type" style="color:${t.color}">${t.glyph} ${t.label}</span><span class="ev-card-date">${date}</span></div>
+      <div class="ev-card-top"><span class="ev-card-type" style="color:${inkFor(t.color)}">${t.glyph} ${t.label}</span><span class="ev-card-date">${date}</span></div>
       <div class="ev-card-site">${esc(p.s || 'Sitio sin nombre')}</div>
       ${loc ? `<div class="ev-card-loc">${esc(loc)}</div>` : ''}
       <div class="ev-card-meta">${tags}</div>${quote}</article>`;
@@ -701,7 +726,7 @@ const V = {
     const d = document.querySelector('#ev-detail');
     d.innerHTML = `
       <button class="ev-d-close" aria-label="Cerrar">← volver a la galería</button>
-      <div class="ev-d-badge" style="background:${t.color}">${t.glyph} ${t.label}${p.st ? ' · ' + esc(p.st) : ''}</div>
+      <div class="ev-d-badge" style="background:${t.color};color:${inkOn(t.color)}">${t.glyph} ${t.label}${p.st ? ' · ' + esc(p.st) : ''}</div>
       <h3 class="ev-d-site">${esc(p.s || 'Sitio sin nombre')}</h3>
       <div class="ev-d-loc">${esc([p.rg, p.c].filter(Boolean).join(' · ') || '')}${p.la != null ? ` · ${p.la}, ${p.lo}` : ''}</div>
       <div class="ev-d-grid">

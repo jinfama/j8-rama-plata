@@ -1,47 +1,54 @@
 /* ══════════════════════════════════════════════════════════════════
    MINERVA — Historia del olivar · Design System
-   Paleta: mármol/pergamino · oro de Minerva · verde olivo · terracota
+   Paleta: marfil/pergamino · sepia · aceite (ámbar → oliva → oro) · tinta oliva oscura
    ══════════════════════════════════════════════════════════════════ */
 :root{
-  /* Chrome palette + typographic voice — 2026-09-06, taken from the approved cover
-     07_temp/portadas_visores_2026-09/minerva/V5_mancha-de-aceite.html:
-       paper #f2eee1 · olive ink #28311d · leaf #4f7a2a · dark olive #3c4a1c ·
-       amphora terracotta #b05620 · hairlines = ink at 22%/44% ·
+  /* LA PALETA DEL INTERIOR ES LA DE LA PORTADA (index.html, V7 «el aceite se
+     derrama», 2026-09-08). Sus tokens, copiados de su :root:
+       paper #f3eee2 / #faf6ea · ink #33351f · sepia #8b7355 / #5f4d33 ·
+       aceite #c9a227 · oliva #6b6a2a / #4e4a1c · oro #e6c65a ·
+       acento (único, cálido) = ámbar oscuro #83630f / #66500a ·
        Bodoni Moda (display) + Alegreya Sans (text).
-     Reading of the system: terracotta = interaction (hover / active / focus),
-     leaf = quiet marks and rules, oil-gold = the OIL, i.e. data (the cover paints
-     its stain in rgb(150,106,20)), so --gold survives only on marks that carry a
-     value: bi-ribbon, rank bars, magnitude bars, the "valor" chip.
+     Fuera el verde de hoja (#4f7a2a) y el naranja de ánfora (#b05620) de la
+     identidad anterior: Juan los descartó el 8 de septiembre.
+     Reading of the system: the amber accent = interaction (hover / active /
+     focus); olive = quiet marks and rules; oil-gold = the OIL, i.e. data, so
+     --gold survives only on marks that carry a value: bi-ribbon, rank bars,
+     magnitude bars, the "valor" chip. The token names --terra / --aegean are
+     kept so the views keep working: --terra now IS the amber accent and
+     --aegean IS the sepia (links, the trade family).
      The data ramps live in js/utils.js and js/views/* (SEQ_COLORS / DIV_COLORS /
-     AEGEAN_COLORS / RAMP / CONF_COL). They WERE revised on 2026-09-06, at the
-     author's request and against measurements: see "Las escalas de mapa SI se
-     tocan" in CLAUDE.md before touching one. The map furniture below is part of
-     that revision and has to stay in step with js/utils.js. */
+     AEGEAN_COLORS(=sepia) / RAMP / CONF_COL / TYPE_INK). See CLAUDE.md before
+     touching one. The map furniture below stays in step with js/utils.js. */
   /* parchment / marble stage */
-  --cream:#F2EEE1; --cream-2:#E7E2CF; --cream-3:#DBD5BC;
-  --paper:#F9F6EC;
-  /* ink — the cover's olive ink, not the old brown */
-  --ink:#28311D; --ink-2:#4C5738; --ink-3:#5F6650;
-  /* gold — Minerva / olive oil */
-  --gold:#C9A227; --gold-lt:#E4C56A; --gold-pale:#F0DD9C; --gold-dk:#9A7B18;
-  /* olive */
-  --olive:#4F7A2A; --olive-dk:#3C4A1C; --olive-lt:#8CA35A; --olive-deep:#243318;
-  /* accents — amphora terracotta from the cover */
-  --terra:#B05620; --terra-dk:#8A3F16; --aegean:#1E5E82; --aegean-lt:#2E7BA6;
-  --purpura:#6A2E6B; --wine:#7A2A3A;
-  /* mobiliario del mapa — los mismos valores que js/utils.js (2026-09-06):
+  --cream:#F3EEE2; --cream-2:#E8E1CD; --cream-3:#DCD4BB;
+  --paper:#FAF6EA;
+  /* ink — the cover's dark olive ink */
+  --ink:#33351F; --ink-2:#4F5136; --ink-3:#62634A;
+  /* gold — the oil */
+  --gold:#C9A227; --gold-lt:#E6C65A; --gold-pale:#F0DD9C; --gold-dk:#9A7B18;
+  /* olive — the oil where it is thick */
+  --olive:#6B6A2A; --olive-dk:#4E4A1C; --olive-lt:#9A9552; --olive-deep:#3A3A18;
+  /* sepia — the map's land and the ink of the ledgers */
+  --sepia:#8B7355; --sepia-dk:#5F4D33; --sepia-lt:#B9A786;
+  /* the one warm accent: dark amber. --terra keeps its name for the code. */
+  --terra:#83630F; --terra-dk:#66500A;
+  /* --aegean kept as an alias: links and the trade family are sepia now */
+  --aegean:#6E5A2E; --aegean-lt:#8B7355;
+  --purpura:#6A2E6B; --wine:#7A2A3A;   /* status colours only (fiabilidad baja) */
+  /* mobiliario del mapa — los mismos valores que js/utils.js:
      cálido = un valor medido, gris neutro = no es un valor. */
   --land-bg:#DCD0BB;         /* tierra fuera del conjunto de datos */
   --map-nodata:#BEBBB2;      /* dentro del conjunto, sin valor este año */
   --map-zero:#F7EEC8;        /* medido, y no hay olivar */
   --land-stroke:rgba(120,96,54,.28);
   /* structural */
-  --border:#CDC7AC; --border-lt:#DDD8C0; --border-dk:#B3AC8C;
-  --rail:#1C2A17;            /* deep olive-night rail */
-  --rail-2:#233318;
-  --rail-ink:rgba(242,238,225,0.90);
-  --rail-ink-2:rgba(242,238,225,0.62);
-  --rail-line:rgba(242,238,225,0.16);
+  --border:#CDC6AB; --border-lt:#DDD7C0; --border-dk:#B3AB8B;
+  --rail:#33351F;            /* the cover's ink: sidebar, footer, active pills */
+  --rail-2:#3E4026;
+  --rail-ink:rgba(243,238,226,0.92);
+  --rail-ink-2:rgba(243,238,226,0.66);
+  --rail-line:rgba(243,238,226,0.16);
   /* type */
   --ff:'Alegreya Sans','Gill Sans','Gill Sans MT','Trebuchet MS',Calibri,system-ui,sans-serif;
   --serif:'Bodoni Moda','Bodoni 72',Didot,'Bodoni MT',Georgia,serif;
@@ -58,7 +65,7 @@ body{
   font-size:var(--fs-base); line-height:1.5; overflow:hidden;
 }
 button{font-family:inherit}
-::selection{background:rgba(176,86,32,.20)}
+::selection{background:rgba(131,99,15,.22)}
 /* Foco de teclado visible en todo el cromo, con el acento de la portada
    (la portada usa outline:2px solid var(--anfora); outline-offset:2px). */
 :focus-visible{outline:2px solid var(--terra); outline-offset:2px}
@@ -88,7 +95,7 @@ button{font-family:inherit}
 .sb-btn .lbl{font-size:9px; font-weight:600; letter-spacing:.4px; text-transform:uppercase; text-align:center; line-height:1.15}
 .sb-btn:hover{color:var(--cream); background:rgba(242,238,225,.07)}
 .sb-btn.on{color:var(--cream); background:rgba(242,238,225,.11)}
-.sb-btn.on::before{content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--terra)}
+.sb-btn.on::before{content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--gold)}
 .sb-foot{padding:10px 6px; border-top:1px solid var(--rail-line)}
 .sb-info{width:100%; background:none; border:0; color:var(--rail-ink-2); cursor:pointer;
   display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 0; transition:var(--tr)}
@@ -114,7 +121,7 @@ button{font-family:inherit}
 .pillset{display:inline-flex; background:var(--cream-2); border:1px solid var(--border-lt); border-radius:0; padding:2px; gap:2px}
 .pill{background:none; border:0; padding:5px 11px; font-size:11px; font-weight:600; color:var(--ink-2);
   cursor:pointer; border-radius:0; transition:var(--tr-f); white-space:nowrap; letter-spacing:.2px}
-.pill:hover{color:var(--ink); background:rgba(176,86,32,.12)}
+.pill:hover{color:var(--ink); background:rgba(131,99,15,.12)}
 .pill.on{background:var(--rail); color:var(--cream); box-shadow:inset 0 1px 2px rgba(0,0,0,.2)}
 .sel{appearance:none; background:var(--cream-2); border:1px solid var(--border-lt); border-radius:0;
   padding:6px 30px 6px 12px; font:inherit; font-size:12px; font-weight:600; color:var(--ink); cursor:pointer;
@@ -213,7 +220,7 @@ button{font-family:inherit}
   color:var(--olive-dk); font-variant-numeric:tabular-nums}
 .tt-sub{color:var(--ink-3); font-size:11px; margin-top:3px; letter-spacing:.2px}
 .tt-chip{display:inline-block; margin-top:5px; font-size:9.5px; padding:1px 6px; border-radius:0;
-  background:rgba(176,86,32,.12); color:var(--terra-dk); border:1px solid rgba(176,86,32,.28);
+  background:rgba(131,99,15,.12); color:var(--terra-dk); border:1px solid rgba(131,99,15,.30);
   text-transform:uppercase; letter-spacing:.06em}
 /* Tarjeta táctil: anclada sobre la línea de tiempo (no se recorta por el borde
    derecho de un teléfono de 390 px) y con su propio cierre de 44 px. */
@@ -235,10 +242,10 @@ button{font-family:inherit}
   font-size:11px; font-weight:700; color:var(--ink-2); cursor:pointer; flex-shrink:0}
 .tl-track{flex:1; position:relative; height:34px; display:flex; align-items:center; cursor:pointer}
 .tl-rail{position:absolute; left:0; right:0; height:4px; background:var(--cream-3); border-radius:0}
-.tl-fill{position:absolute; height:4px; background:linear-gradient(90deg,var(--olive-lt),var(--terra)); border-radius:0}
+.tl-fill{position:absolute; height:4px; background:linear-gradient(90deg,var(--gold-lt),var(--olive)); border-radius:0}
 /* Excepción a los bordes cuadrados: es la perilla que se arrastra. */
 .tl-handle{position:absolute; width:16px; height:16px; border-radius:50%; background:var(--paper);
-  border:2px solid var(--terra-dk); transform:translateX(-50%); box-shadow:0 1px 4px rgba(0,0,0,.25); cursor:grab; top:50%; margin-top:-8px}
+  border:2px solid var(--olive-dk); transform:translateX(-50%); box-shadow:0 1px 4px rgba(0,0,0,.25); cursor:grab; top:50%; margin-top:-8px}
 .tl-handle:active{cursor:grabbing}
 .tl-year{font-family:var(--serif); font-style:italic; font-size:26px; font-weight:500; color:var(--ink);
   min-width:70px; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums}
@@ -305,8 +312,8 @@ button{font-family:inherit}
 .ev-card-meta{display:flex; flex-wrap:wrap; gap:5px; margin-top:7px}
 .ev-tag{font-size:9px; padding:2px 7px; border-radius:0; background:var(--cream-2); color:var(--ink-2);
   border:1px solid var(--border-lt); letter-spacing:.3px}
-.ev-tag.dating{background:rgba(46,123,166,.1); color:var(--aegean); border-color:rgba(46,123,166,.24)}
-.ev-tag.val{background:rgba(201,162,39,.14); color:#6F5810; border-color:rgba(201,162,39,.42); font-weight:700}
+.ev-tag.dating{background:rgba(110,90,46,.10); color:var(--aegean); border-color:rgba(110,90,46,.28)}
+.ev-tag.val{background:rgba(201,162,39,.14); color:#66500A; border-color:rgba(201,162,39,.42); font-weight:700}
 .ev-card-ref{font-size:10.5px; color:var(--ink-2); margin-top:8px; line-height:1.4; padding-top:7px; border-top:1px solid var(--border-lt)}
 .ev-card-ref a{color:var(--aegean); text-decoration:none}
 .ev-card-ref a:hover{text-decoration:underline}
@@ -340,7 +347,7 @@ button{font-family:inherit}
 /* ════════════════ BILATERAL ════════════════ */
 .bi-ribbon{fill:var(--gold); transition:fill-opacity .2s}
 .bi-node{cursor:pointer}
-.bi-src{fill:var(--terra); stroke:var(--paper); stroke-width:1.2}
+.bi-src{stroke:var(--paper); stroke-width:1.2}
 .bi-label{font-size:10px; fill:var(--ink); paint-order:stroke; stroke:var(--paper); stroke-width:3px; stroke-linejoin:round}
 
 /* ════════════════ ABOUT ════════════════ */
@@ -479,7 +486,7 @@ button{font-family:inherit}
 .ev-tabs::-webkit-scrollbar{display:none}
 .ev-tab{background:none; border:0; border-bottom:2px solid transparent; padding:9px 14px; cursor:pointer;
   font:inherit; font-size:12px; font-weight:600; color:var(--ink-3); white-space:nowrap; transition:var(--tr-f)}
-.ev-tab:hover{color:var(--ink-2); background:rgba(176,86,32,.08)}
+.ev-tab:hover{color:var(--ink-2); background:rgba(131,99,15,.08)}
 .ev-tab.on{color:var(--ink); border-bottom-color:var(--terra)}
 .ev-panels{flex:1; position:relative; min-height:0}
 .ev-panel{position:absolute; inset:0; display:none; flex-direction:column}
@@ -552,7 +559,7 @@ button{font-family:inherit}
 .ev-flag{display:grid; grid-template-columns:minmax(150px,1fr) minmax(90px,2fr) 116px; align-items:center; gap:10px}
 .ev-flag .fl{font-size:11.5px; color:var(--ink-2)}
 .ev-flag .fb{height:11px; background:var(--cream-2); border-radius:0; overflow:hidden}
-.ev-flag .fb i{display:block; height:100%; background:linear-gradient(90deg,var(--gold),var(--terra)); border-radius:0}
+.ev-flag .fb i{display:block; height:100%; background:linear-gradient(90deg,var(--gold-lt),var(--gold-dk)); border-radius:0}
 .ev-flag .fv{font-size:11.5px; font-weight:700; color:var(--ink); text-align:right; font-variant-numeric:tabular-nums}
 .ev-flag .fv em{display:inline-block; font-style:normal; font-weight:600; color:var(--ink-3); margin-left:7px;
   min-width:48px}
@@ -574,7 +581,7 @@ button{font-family:inherit}
   font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-2);
   padding:8px 9px; border-bottom:1px solid var(--border)}
 .ev-tbl td{padding:7px 9px; border-bottom:1px solid var(--border-lt); vertical-align:middle; color:var(--ink-2)}
-.ev-tbl tr:hover td{background:rgba(176,86,32,.07)}
+.ev-tbl tr:hover td{background:rgba(131,99,15,.07)}
 .ev-tbl th.num,.ev-tbl td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;
   font-weight:700; color:var(--ink)}
 .ev-tbl td.src{font-weight:600; color:var(--ink); max-width:250px; word-break:break-word}

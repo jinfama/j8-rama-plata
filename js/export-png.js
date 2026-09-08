@@ -6,14 +6,14 @@
 // with a caption that repeats title, year and source, so a screenshot pasted
 // into a slide still reads on its own.
 
-import { State } from './state.js?v=20260906m';
+import { State } from './state.js?v=20260908b';
 
 const SCALE = 2;
 const CAPTION_H = 62;
-const PAPER = '#F2EEE1';
-const INK = '#28311D';
-const INK_2 = '#4C5738';
-const TERRA = '#B05620';
+const PAPER = '#F3EEE2';
+const INK = '#33351F';
+const INK_2 = '#4F5136';
+const TERRA = '#83630F';   // the cover's amber accent (V7, 2026-09-08)
 
 const STYLE_PROPS = [
   'fill', 'fill-opacity', 'fill-rule',
