@@ -120,10 +120,18 @@
   .slider .tk span{position:absolute;transform:translateX(-50%);white-space:nowrap;line-height:1}
   .slider .tk span:first-child{transform:none}
   .slider .tk span:last-child{transform:translateX(-100%)}
-  .hint{margin:0;position:absolute;left:clamp(14px,2vw,30px);bottom:calc(var(--padb) + 58px);font-size:12px;letter-spacing:.08em;
-        text-transform:uppercase;color:var(--faint);white-space:nowrap;opacity:0;transition:opacity .6s ease .3s;pointer-events:none}
+  .hint{margin:0;position:absolute;right:clamp(14px,2vw,30px);bottom:calc(var(--padb) + 58px);font-size:12px;letter-spacing:.08em;
+        text-transform:uppercase;color:var(--faint);white-space:nowrap;opacity:0;transition:opacity .6s ease .3s;pointer-events:none;text-align:right}
   body.done .hint{opacity:1}
   body.touched .hint{opacity:0;transition:opacity .25s ease}
+  @media (max-width:1320px){ .hint{display:none} }
+
+  /* the key: one line, six medallions and their names (not a panel) */
+  .key{margin:0;position:absolute;left:clamp(14px,2vw,30px);bottom:calc(var(--padb) + 58px);display:flex;flex-wrap:wrap;
+       gap:4px 16px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);pointer-events:none;
+       max-width:calc(100% - 2 * clamp(14px,2vw,30px))}
+  .key span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;line-height:1}
+  .scene .key canvas{position:static;inset:auto;width:20px;height:20px;display:block;flex:none}
 
   /* the card that names a glyph */
   .tip{position:fixed;z-index:9;pointer-events:none;max-width:min(260px,76vw);background:rgba(250,246,234,.97);border:1px solid var(--hair2);
@@ -155,6 +163,9 @@
     .strip .slider{grid-column:1 / span 2}
     .clock .yr{font-size:1.5rem}
     .hint{display:none}
+    .key{left:12px;right:12px;bottom:106px;gap:3px 11px;font-size:11px;max-width:none}
+    .scene .key canvas{width:18px;height:18px}
+    .cap{max-width:72%}
     .slider .tk span.mid{display:none}
     .cta-fixed{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:8;margin:0;
                padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(rgba(243,238,226,0),var(--paper) 40%)}
@@ -233,9 +244,10 @@
     <div class="scene" id="scene">
       <canvas id="c" aria-hidden="true"></canvas>
       <div class="edge" aria-hidden="true"></div>
-      <div class="hit" id="hit" tabindex="0" role="img" aria-label="Mapa del Mediterráneo sobre el que se derrama aceite allí donde hay evidencia arqueológica o documental del olivo, hasta el año seleccionado"></div>
-      <p class="cap" id="cap"><b>El aceite se derrama por donde el olivo dejó rastro</b><span class="only-wide">Polen, ánforas, prensas, huesos de aceituna, epigrafía y textos: 8.405 hallazgos datados, de 12000 a. C. a hoy · </span><a href="visor.html?about=1">Sobre esta pieza</a></p>
+      <div class="hit" id="hit" tabindex="0" role="img" aria-label="Mapa del Mediterráneo con un punto de tinta por cada hallazgo arqueológico o documental del olivo hasta el año seleccionado; el aceite empapa el papel allí donde se acumulan"></div>
+      <p class="cap" id="cap"><b>Cada punto es un hallazgo; el aceite, por donde el olivo dejó rastro</b><span class="only-wide">Polen, ánforas, prensas, huesos de aceituna, epigrafía y textos: 8.405 hallazgos datados, de 12000 a. C. a hoy · </span><a href="visor.html?about=1">Sobre esta pieza</a></p>
       <p class="hint">Arrastra sobre el mapa para recorrer el tiempo</p>
+      <p class="key rise d3" id="key" aria-label="Tipos de evidencia"></p>
       <div class="strip">
         <button class="play" id="play" type="button" aria-label="Reproducir o pausar el recorrido por el tiempo">
           <svg class="ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
@@ -314,9 +326,10 @@ function cursorFor(y){ var lo=0,hi=NP; while(lo<hi){ var m=(lo+hi)>>1; if(pY0[m]
 var uNow=0, year=Y0, cursor=0, playing=false, finished=false, intro=true, living=false;
 var reduced=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 var coarse=!!(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches);
-var DUR=9.0;             /* seconds for the whole rule */
-var GROW=520;            /* ms a drop takes to spread */
+var DUR=11.0;            /* seconds for the whole rule */
+var GROW=2600;           /* ms a drop takes to soak in: slow, like oil on paper */
 var hover=-1;            /* index into FEAT */
+var liveT0=0;            /* when the living state began (the front keeps creeping from then on) */
 
 /* ---------- canvas and layers ---------- */
 var DPR=Math.min(2,window.devicePixelRatio||1);
@@ -325,31 +338,36 @@ function offs(w,h){ var c=document.createElement('canvas'); c.width=Math.max(1,M
   var x=c.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); return {c:c,x:x,w:w,h:h}; }
 var Lmap=null,Lnames=null, W=1,H=1, proj, kDeg=1, scale=1;
 var COS=Math.cos(38*Math.PI/180), sx=new Float32Array(NP), sy=new Float32Array(NP);
-var TIERRA=[196,178,140], COSTA=[104,86,58], SOMBRA=[150,124,84], TINTA=[51,53,31], MARWASH=[150,160,150];
+var TIERRA=[198,182,146], COSTA=[104,86,58], SOMBRA=[150,124,84], TINTA=[51,53,31], MARWASH=[150,160,150], DOTINK=[78,74,28];
 
 /* ---------- the oil: a density field, one gaussian drop per find ----------
-   Every find is a drop that spreads over GROW ms. Settled drops live in `dens`;
-   the ones still spreading are re-splatted each frame into `densG` with their
-   current weight. The field is then read as oil: a soaked halo where it is
-   faint, a body whose thickness (log of the density) picks the colour from
-   pale gold through amber to dark olive, a darker meniscus at the rim, and a
-   specular reflection where the dome of the drop tilts toward a light that
-   sits up and to the left. */
+   Every find is a drop that soaks in over GROW ms. Settled drops live in
+   `dens`; the ones still spreading are re-splatted each frame into `densG`
+   with their current weight. The field is blurred (two binomial passes, so
+   the front has no staircase) and read as virgin olive oil on paper: a paler,
+   yellowed halo where the paper is merely damp, and a translucent body whose
+   thickness (log of the density) picks the colour from pale yellow-green
+   through #b9b03a to olive #6f7a1e. It multiplies the map, as a stain would,
+   and never covers it; the only shine is a faint reflection where the film
+   tilts toward a lamp up and to the left. */
 var CELL=4,gw=1,gh=1,dens=null,densG=null,nmul=null,ph=null,sn1=null,sn2=null,Tf=null,Ef=null,Hf=null,Hg=null,Df=null,Db=null;
 var fcv=null,fctx=null,fimg=null,fdat=null,gcv=null,gctx=null,gimg=null,gdat=null,fbl=null,fbx=null,gbl=null,gbx=null,KR=5,kern=null;
-var AMP=0.8, H0=0.29, E0=0.36, E1=0.54, DMAX=130, LOGD=Math.log1p(DMAX);
-var LX=-0.58,LY=-0.60,LZ=0.55, KH=13.0;
+/* thresholds on the density: below H0 dry paper, H0..E0 the damp halo, from E0 the oil; DMAX is the density that reads as thickest */
+var AMP=0.8, H0=0.09, E0=0.20, E1=0.52, DMAX=90, LOGD=Math.log1p(DMAX);
+var A0=0.24, A1=0.30;    /* body opacity, thin -> thick (0.24 -> 0.54): the coast reads through */
+var LX=-0.58,LY=-0.60,LZ=0.55, KH=6.0;
 var blurOK=(function(){ var t=document.createElement('canvas').getContext('2d'); t.filter='blur(2px)'; return t.filter!=='none'; })();
 var SINT=new Float32Array(256); for(var si=0;si<256;si++) SINT[si]=Math.sin(si/256*TAU);
 var LUT=new Uint8ClampedArray(256*3);
 (function(){
-  var stops=[[0,[242,212,104]],[0.18,[228,182,52]],[0.38,[206,156,30]],[0.62,[158,132,34]],[0.84,[112,100,30]],[1,[84,78,24]]];
+  /* multiplied over the paper these land near #b9b03a in the thin body and #6f7a1e where it is thickest */
+  var stops=[[0,[236,224,96]],[0.25,[206,194,44]],[0.5,[168,172,30]],[0.78,[120,140,22]],[1,[92,124,16]]];
   for(var t=0;t<256;t++){ var v=t/255, a=stops[0], b=stops[1];
     for(var s=0;s<stops.length-1;s++) if(v>=stops[s][0]&&v<=stops[s+1][0]){ a=stops[s]; b=stops[s+1]; break; }
     var f=(b[0]===a[0])?0:(v-a[0])/(b[0]-a[0]);
     LUT[t*3]=a[1][0]+(b[1][0]-a[1][0])*f; LUT[t*3+1]=a[1][1]+(b[1][1]-a[1][1])*f; LUT[t*3+2]=a[1][2]+(b[1][2]-a[1][2])*f; }
 })();
-var HALO=[240,222,160];
+var HALO=[240,226,130], HALOA=0.26;
 function buildField(){
   CELL=Math.max(3,Math.min(5,Math.round(W/250)));
   gw=Math.ceil(W/CELL)+2; gh=Math.ceil(H/CELL)+2;
@@ -361,11 +379,11 @@ function buildField(){
   for(var y=0;y<gh;y++) for(var x=0;x<gw;x++){ var q=y*gw+x;
     /* lobes, not fuzz: low-frequency noise gives the front a rounded, wandering edge */
     var nn=0.7*noise2(x*0.055*sc+5,y*0.055*sc+9)+0.3*noise2(x*0.13*sc+31,y*0.13*sc+17);
-    nmul[q]=0.80+0.40*nn;
+    nmul[q]=0.86+0.28*nn;
     ph[q]=hash2(x+977,y+311)*256;
     sn1[q]=noise2(x*0.028*sc+11,y*0.028*sc+7)*2-1;
     sn2[q]=noise2(x*0.028*sc+91,y*0.028*sc+53)*2-1; }
-  var sig=Math.max(1.5,8.5/CELL); KR=Math.max(3,Math.round(sig*2.5));
+  var sig=Math.max(1.8,11/CELL); KR=Math.max(4,Math.round(sig*2.5));
   var kw=KR*2+1; kern=new Float32Array(kw*kw);
   for(var ky=-KR;ky<=KR;ky++) for(var kx=-KR;kx<=KR;kx++) kern[(ky+KR)*kw+(kx+KR)]=AMP*Math.exp(-(kx*kx+ky*ky)/(2*sig*sig));
   fcv=document.createElement('canvas'); fcv.width=gw; fcv.height=gh; fctx=fcv.getContext('2d'); fimg=fctx.createImageData(gw,gh); fdat=fimg.data;
@@ -386,10 +404,20 @@ function settleAll(){ for(var g=0;g<grow.length;g++) splat(dens,grow[g].i,1); se
 function updateGrow(now){
   if(!grow.length) return false;
   while(grow.length&&now-grow[0].t>=GROW){ splat(dens,grow[0].i,1); settled++; grow.shift(); }
-  while(grow.length>700){ splat(dens,grow[0].i,1); settled++; grow.shift(); }
+  while(grow.length>1200){ splat(dens,grow[0].i,1); settled++; grow.shift(); }
   densG.fill(0);
-  for(var g=0;g<grow.length;g++){ var w=ss((now-grow[g].t)/GROW); w=w*w; splat(densG,grow[g].i,w); }
+  /* the soak: quick at first, then slowing as it nears its rim (ease-out) */
+  for(var g=0;g<grow.length;g++){ var k=(now-grow[g].t)/GROW; if(k<0) k=0; if(k>1) k=1; var w=1-(1-k)*(1-k)*(1-k); splat(densG,grow[g].i,w); }
   return true;
+}
+/* separable binomial [1 4 6 4 1]/16 over the field, edges clamped: one pass is a gaussian of one cell */
+function blur5(A,B){
+  var x,y,q,ro,m2,m1,p1,p2;
+  for(y=0;y<gh;y++){ ro=y*gw;
+    for(x=0;x<gw;x++){ q=ro+x;
+      B[q]=(A[x>1?q-2:ro]+4*A[x>0?q-1:ro]+6*A[q]+4*A[x<gw-1?q+1:ro+gw-1]+A[x<gw-2?q+2:ro+gw-1])*0.0625; } }
+  for(y=0;y<gh;y++){ m2=(y>1?y-2:0)*gw; m1=(y>0?y-1:0)*gw; ro=y*gw; p1=(y<gh-1?y+1:gh-1)*gw; p2=(y<gh-2?y+2:gh-1)*gw;
+    for(x=0;x<gw;x++) A[ro+x]=(B[m2+x]+4*B[m1+x]+6*B[ro+x]+4*B[p1+x]+B[p2+x])*0.0625; }
 }
 function setCursor(target,now,quick){
   target=Math.max(0,Math.min(NP,target));
@@ -408,71 +436,65 @@ function setCursor(target,now,quick){
 function paintOil(now){
   oilDirty=false; compDirty=true;
   var n=gw*gh,q,d,x,y;
-  var wob=living&&!reduced, tt=now*0.001, cs=Math.cos(tt*0.09), sn=Math.sin(tt*0.09), br=1+0.025*Math.sin(tt*0.45), wt=tt*0.55*256/TAU;
-  /* pass 0: the raw field, with its lobed edge and, once the act is over, a slow breath */
+  var wob=living&&!reduced, tt=now*0.001, cs=Math.cos(tt*0.07), sn=Math.sin(tt*0.07);
+  /* a slow breath (±3 %, 22 s) and, once the act is over, a creep: the thresholds sink by a tenth over
+     a minute or two, so the front keeps advancing without ever being seen to move */
+  var br=1+0.03*Math.sin(tt*0.28), wt=tt*0.35*256/TAU;
+  var creep=(living&&liveT0)?1-0.11*(1-Math.exp(-(now-liveT0)*0.001/55)):1;
+  var h0=H0*creep, e0=E0*creep, e1=E1*creep, ihe=1/(e0-h0), iee=1/(e1-e0);
+  /* pass 0: the raw field with its lobed edge */
   for(q=0;q<n;q++){
     d=(dens[q]+densG[q]);
-    if(d<=0.02){ Df[q]=0; continue; }
-    d*=nmul[q]*br; if(wob) d*=1+0.045*SINT[(wt+ph[q])&255];
+    if(d<=0.01){ Df[q]=0; continue; }
+    d*=nmul[q]*br; if(wob) d*=1+0.035*SINT[(wt+ph[q])&255];
     Df[q]=d;
   }
-  /* a light separable smoothing: liquid has no grain inside */
-  for(y=0;y<gh;y++){ var ro=y*gw; Db[ro]=Df[ro]; Db[ro+gw-1]=Df[ro+gw-1];
-    for(x=1;x<gw-1;x++){ q=ro+x; Db[q]=0.25*Df[q-1]+0.5*Df[q]+0.25*Df[q+1]; } }
-  for(x=0;x<gw;x++){ Df[x]=Db[x]; Df[(gh-1)*gw+x]=Db[(gh-1)*gw+x];
-    for(y=1;y<gh-1;y++){ q=y*gw+x; Df[q]=0.25*Db[q-gw]+0.5*Db[q]+0.25*Db[q+gw]; } }
-  /* pass 1: halo, edge, thickness and the height of the dome */
+  /* two binomial passes each way: a gaussian of about 1.4 cells, no grain inside and no staircase at the rim */
+  blur5(Df,Db); blur5(Df,Db);
+  /* pass 1: halo, edge, thickness and the height of the film */
   for(q=0;q<n;q++){
     d=Df[q];
-    if(d<H0){ Tf[q]=0; Ef[q]=0; Hf[q]=0; Hg[q]=0; continue; }
-    Hf[q]=ss((d-H0)/(E0-H0));
-    if(d<E0){ Tf[q]=0; Ef[q]=0; Hg[q]=0; continue; }
-    var e=ss((d-E0)/(E1-E0)); Ef[q]=e;
-    var T=Math.log1p(d-E0)/LOGD; if(T>1) T=1; Tf[q]=T;
-    Hg[q]=e*(0.55+0.45*T);
+    if(d<h0){ Tf[q]=0; Ef[q]=0; Hf[q]=0; Hg[q]=0; continue; }
+    Hf[q]=ss((d-h0)*ihe);
+    if(d<e0){ Tf[q]=0; Ef[q]=0; Hg[q]=0; continue; }
+    var e=ss((d-e0)*iee); Ef[q]=e;
+    var T=Math.log1p(d-e0)/LOGD; if(T>1) T=1; Tf[q]=T;
+    Hg[q]=e*(0.4+0.6*T);
   }
-  /* pass 2: colour by thickness, a darker meniscus at the rim, the reflection where the dome tilts to the light */
+  /* pass 2: colour by thickness, a barely darker wet edge, a faint reflection where the film tilts to the lamp */
   var idx=0;
   for(y=0;y<gh;y++) for(x=0;x<gw;x++,idx++){
-    var T2=Tf[idx], hf=Hf[idx], o=idx*4;
-    if(T2<=0){
+    var e2=Ef[idx], hf=Hf[idx], o=idx*4;
+    if(e2<=0){
       if(hf<=0){ fdat[o+3]=0; gdat[o+3]=0; continue; }
-      fdat[o]=HALO[0]; fdat[o+1]=HALO[1]; fdat[o+2]=HALO[2]; fdat[o+3]=(hf*0.34*255)|0; gdat[o+3]=0; continue;
+      fdat[o]=HALO[0]; fdat[o+1]=HALO[1]; fdat[o+2]=HALO[2]; fdat[o+3]=(hf*HALOA*255)|0; gdat[o+3]=0; continue;
     }
-    var e2=Ef[idx];
-    /* the rim: a steep little dome whose flank facing the lamp catches a hard reflection */
+    var T2=Tf[idx];
     var gx=(x>0&&x<gw-1)?(Hg[idx+1]-Hg[idx-1])*0.5:0, gy=(y>0&&y<gh-1)?(Hg[idx+gw]-Hg[idx-gw])*0.5:0;
     var nx=-gx*KH, ny=-gy*KH, inv=1/Math.sqrt(nx*nx+ny*ny+1);
     var ndl=(nx*LX+ny*LY+LZ)*inv;
-    var spec=ndl>0.58?(ndl-0.58)/0.42:0; spec=spec*spec;
-    /* the flank that turns away from the lamp falls into shade: that is what makes the drop stand up */
-    var away=ndl<0.50?(0.50-ndl)/0.50:0; away=away*e2;
-    /* the body: a broad, soft sheen along the lit side of every pool */
-    var bx=(x>1&&x<gw-2)?(Hg[idx+2]-Hg[idx-2])*0.25:gx, by=(y>1&&y<gh-2)?(Hg[idx+2*gw]-Hg[idx-2*gw])*0.25:gy;
-    var mx2=-bx*KH*0.7, my2=-by*KH*0.7, inv2=1/Math.sqrt(mx2*mx2+my2*my2+1);
-    var nd2=(mx2*LX+my2*LY+LZ)*inv2;
-    var bloom=nd2>0.60?(nd2-0.60)/0.40:0; bloom=bloom*bloom*0.18;
-    var shn=sn1[idx]*cs+sn2[idx]*sn; shn=ss((shn+0.05)/0.8); shn=shn*shn*0.13*(0.3+0.7*T2);
-    var rim=e2*(1-e2)*4; rim=rim*(0.5+0.5*(1-T2));
+    var spec=ndl>0.66?(ndl-0.66)/0.34:0; spec=spec*spec;
+    var shn=sn1[idx]*cs+sn2[idx]*sn; shn=ss((shn+0.05)/0.8); shn=shn*shn*0.07*(0.3+0.7*T2);
+    var rim=e2*(1-e2)*4;
     var li=(T2*255)|0, r=LUT[li*3], g=LUT[li*3+1], b=LUT[li*3+2];
-    var dk=(1-0.46*rim)*(1-0.22*away); r*=dk; g*=dk; b*=dk;
-    var ab=e2*(0.58+0.28*T2+0.16*rim+0.08*away); if(ab>0.88) ab=0.88;
-    var ah=hf*0.34*(1-ab), at=ab+ah;
+    var dk=1-0.09*rim; r*=dk; g*=dk; b*=dk;
+    var ab=e2*(A0+A1*T2);
+    var ah=hf*HALOA*(1-ab), at=ab+ah;
     if(at>0){ var k1=ab/at, k2=ah/at; r=r*k1+HALO[0]*k2; g=g*k1+HALO[1]*k2; b=b*k1+HALO[2]*k2; }
     fdat[o]=r; fdat[o+1]=g; fdat[o+2]=b; fdat[o+3]=(at*255)|0;
-    var ga=spec*(0.5+0.5*e2)*0.95+bloom*(0.5+0.5*e2)+shn*e2; if(ga>1) ga=1;
+    var ga=(spec*0.5+shn)*e2; if(ga>1) ga=1;
     gdat[o+3]=(ga*255)|0;
   }
   fctx.putImageData(fimg,0,0); gctx.putImageData(gimg,0,0);
 }
 
-/* ---------- glyphs: six kinds of evidence drawn as small medallions ---------- */
-var GS=44, sprites={};
+/* ---------- glyphs: six kinds of evidence drawn as medallions ---------- */
+var GS=56, sprites={};
 function drawGlyph(g,kind,S){
   var m=S/2,u=S*0.27; g.save(); g.translate(m,m);
-  g.fillStyle='rgba(250,246,234,0.93)'; g.beginPath(); g.arc(0,0,S*0.47,0,TAU); g.fill();
-  g.strokeStyle='rgba(51,53,31,0.5)'; g.lineWidth=S*0.03; g.stroke();
-  g.strokeStyle='rgba(51,53,31,0.96)'; g.fillStyle='rgba(51,53,31,0.96)'; g.lineWidth=S*0.055; g.lineCap='round'; g.lineJoin='round';
+  g.fillStyle='rgba(250,246,234,0.95)'; g.beginPath(); g.arc(0,0,S*0.47,0,TAU); g.fill();
+  g.strokeStyle='rgba(78,74,28,0.8)'; g.lineWidth=S*0.036; g.stroke();
+  g.strokeStyle='rgba(51,53,31,0.97)'; g.fillStyle='rgba(51,53,31,0.97)'; g.lineWidth=S*0.064; g.lineCap='round'; g.lineJoin='round';
   if(kind==='pollen'){
     g.beginPath(); g.arc(0,0,u*0.86,0,TAU); g.stroke();
     for(var k=0;k<3;k++){ var a=k*TAU/3-Math.PI/2; g.beginPath(); g.arc(Math.cos(a)*u*0.46,Math.sin(a)*u*0.46,u*0.17,0,TAU); g.stroke(); }
@@ -505,28 +527,64 @@ function drawGlyph(g,kind,S){
   g.restore();
 }
 GLYPH_KINDS.forEach(function(kd){ var c=document.createElement('canvas'); c.width=c.height=Math.round(GS*DPR); var g=c.getContext('2d'); g.setTransform(DPR,0,0,DPR,0,0); drawGlyph(g,kd,GS); sprites[kd]=c; });
+/* the key: the same six medallions, drawn once, with their names */
+var KEY_LABEL={pollen:'Polen',amphora:'Ánfora',olive_press:'Prensa',macroremains:'Hueso de aceituna',literary:'Texto',epigraphy:'Epígrafe'};
+(function(){
+  var el=$('key'); if(!el) return; var h='';
+  GLYPH_KINDS.forEach(function(kd){ h+='<span><canvas data-k="'+kd+'"></canvas>'+KEY_LABEL[kd]+'</span>'; });
+  el.innerHTML=h;
+  var cs=el.querySelectorAll('canvas');
+  for(var c=0;c<cs.length;c++){ var cv=cs[c], KS=20; cv.width=cv.height=Math.round(KS*DPR); var g=cv.getContext('2d'); g.setTransform(DPR,0,0,DPR,0,0); drawGlyph(g,cv.getAttribute('data-k'),KS); }
+})();
 
-/* which finds float as glyphs: a few of each kind, spread over the map and over time */
-var FEAT=[], GSZ=22;
+/* ---------- every find is a dot of olive ink; the dots are drawn once and kept ---------- */
+var Ldots=null, dotsDrawn=0, dotsInComp=0, DOTR=1.3;
+function drawDots(g,a,b){
+  g.fillStyle=rgba(DOTINK,0.44);
+  for(var i=a;i<b;i++){ var jx=(hash2(i,3)-0.5)*2.6, jy=(hash2(i,5)-0.5)*2.6; g.beginPath(); g.arc(sx[i]+jx,sy[i]+jy,DOTR,0,TAU); g.fill(); }
+}
+/* the sheet of dots follows the cursor; a retreat redraws it from the start */
+function updateDots(){
+  if(cursor===dotsDrawn) return;
+  if(cursor>dotsDrawn) drawDots(Ldots.x,dotsDrawn,cursor); else { Ldots.x.clearRect(0,0,W,H); drawDots(Ldots.x,0,cursor); }
+  dotsDrawn=cursor;
+}
+
+/* which finds float as glyphs: the six kinds take turns, each drawing from its own fixed shuffle of named
+   sites, and a glyph is kept only if it sits at least minSep from every glyph already placed — so the
+   medallions are many, of every kind, and never pile up */
+var FEAT=[], GSZ=30;
 function goodName(i){ var s=SITES[pS[i]]||''; return s.length>1&&s.length<=30&&s.indexOf('…')<0&&!/^PBDB|^Pollen|^Chronolog|data|sample|core|profile/i.test(s); }
 function pickFeatured(){
   FEAT=[];
-  var want=coarse||W<560?22:Math.min(54,Math.round(W*H/17000)), minSep=coarse?52:64, sep2=minSep*minSep;
-  var perKind=Math.ceil(want/6)+2, perSlice=Math.ceil(want/8)+1, nK={}, nS=new Int32Array(8);
+  var want=coarse||W<560?34:Math.min(120,Math.round(W*H/8200)), minSep=coarse?38:44, sep2=minSep*minSep;
+  var perKind=Math.ceil(want/6)+3, nK={}, ptr={}, cand={}, k, kd;
   var pad=GSZ, labels=E.places.map(function(pl){ return proj(pl[1],pl[2]); });
+  var botKeep=coarse?150:104, capY=coarse?72:112, capX=coarse?0.36:0.5;
   function onLabel(x,y){ for(var l=0;l<labels.length;l++){ if(Math.abs(x-labels[l][0])<(l===0?90:52)&&Math.abs(y-labels[l][1])<18) return true; } return false; }
-  for(var i=0;i<NP&&FEAT.length<want;i++){
-    var kd=TY[pT[i]].k; if(!GLYPH_LABEL[kd]) continue;
+  for(k=0;k<GLYPH_KINDS.length;k++){ cand[GLYPH_KINDS[k]]=[]; nK[GLYPH_KINDS[k]]=0; ptr[GLYPH_KINDS[k]]=0; }
+  for(var i=0;i<NP;i++){
+    kd=TY[pT[i]].k; if(!cand[kd]) continue;
     if(!goodName(i)) continue;
-    if(sx[i]<pad||sy[i]<pad+40||sx[i]>W-pad||sy[i]>H-pad-70) continue;
+    if(sx[i]<pad||sy[i]<pad+12||sx[i]>W-pad||sy[i]>H-pad-botKeep) continue;
+    if(sy[i]<capY&&sx[i]>W*capX) continue;
     if(onLabel(sx[i],sy[i])) continue;
-    var sl=Math.min(7,Math.floor(tpos(pY0[i])*8));
-    if((nK[kd]||0)>=perKind||nS[sl]>=perSlice) continue;
-    var ok=true; for(var f=0;f<FEAT.length;f++){ var dx=sx[i]-FEAT[f].x, dy=sy[i]-FEAT[f].y; if(dx*dx+dy*dy<sep2){ ok=false; break; } }
-    if(!ok) continue;
-    nK[kd]=(nK[kd]||0)+1; nS[sl]++;
-    FEAT.push({i:i,x:sx[i],y:sy[i],k:kd,born:-1,phase:hash2(i,7)*TAU});
+    cand[kd].push(i);
   }
+  var rnd=mulberry(SEED+5);
+  for(k=0;k<GLYPH_KINDS.length;k++){ var a=cand[GLYPH_KINDS[k]]; for(var j=a.length-1;j>0;j--){ var r=(rnd()*(j+1))|0, t=a[j]; a[j]=a[r]; a[r]=t; } }
+  var progress=true;
+  while(FEAT.length<want&&progress){
+    progress=false;
+    for(k=0;k<GLYPH_KINDS.length&&FEAT.length<want;k++){ kd=GLYPH_KINDS[k]; var c=cand[kd];
+      if(nK[kd]>=perKind) continue;
+      while(ptr[kd]<c.length){ var i2=c[ptr[kd]++], ok=true;
+        for(var f=0;f<FEAT.length;f++){ var dx=sx[i2]-FEAT[f].x, dy=sy[i2]-FEAT[f].y; if(dx*dx+dy*dy<sep2){ ok=false; break; } }
+        if(ok){ nK[kd]++; FEAT.push({i:i2,x:sx[i2],y:sy[i2],k:kd,born:-1,phase:hash2(i2,7)*TAU}); progress=true; break; }
+      }
+    }
+  }
+  FEAT.sort(function(p,q){ return p.i-q.i; });
 }
 
 /* ---------- layout ---------- */
@@ -541,8 +599,8 @@ function relayout(){
   var mx=W/2, my=H/2; kDeg=k;
   proj=function(lon,lat){ return [mx+(lon-cLon)*COS*k, my-(lat-cLat)*k]; };
   for(var j=0;j<NP;j++){ sx[j]=mx+(pLo[j]-cLon)*COS*k; sy[j]=my-(pLa[j]-cLat)*k; }
-  scale=Math.min(1.4,Math.max(0.6,W/900)); GSZ=coarse||W<560?19:22;
-  Lmap=offs(W,H); Lnames=offs(W,H); Lcomp=offs(W,H); compDirty=true;
+  scale=Math.min(1.4,Math.max(0.6,W/900)); GSZ=coarse||W<560?24:30; DOTR=coarse||W<560?1.15:1.3;
+  Lmap=offs(W,H); Lnames=offs(W,H); Lcomp=offs(W,H); Ldots=offs(W,H); dotsDrawn=0; dotsInComp=0; compDirty=true;
   buildField(); renderMap(); pickFeatured();
   var keep=cursor; cursor=0; settled=0; grow.length=0; setCursor(keep,performance.now(),true); settleAll(); oilDirty=true;
 }
@@ -599,21 +657,35 @@ var composeQueued=false, compDirty=true, Lcomp=null;
 function compose(now){
   composeQueued=false;
   if(oilDirty||(living&&!reduced&&frames%3===0)) paintOil(now);
+  /* the dot sheet joins the cached plate whenever the oil is repainted; dots that arrive between two
+     repaints are drawn straight on the screen until then (a retreat, or a long backlog, forces a recompose) */
+  var dPrev=dotsDrawn; updateDots();
+  if(dotsDrawn<dPrev||dotsDrawn-dotsInComp>600) compDirty=true;
   if(compDirty){
-    /* map + oil + reflection + names are cached; only the glyphs move every frame */
+    /* map + oil + reflection + dots + names are cached; only rings and glyphs go on top every frame */
     compDirty=false; var C=Lcomp.x;
     C.clearRect(0,0,W,H); C.drawImage(Lmap.c,0,0,W,H);
     /* the softening is done on the small field canvases (a few hundred px), never on the screen-size plate */
     var fb=fcv, gb=gcv;
-    if(blurOK){ fbx.clearRect(0,0,gw,gh); fbx.filter='blur(0.55px)'; fbx.drawImage(fcv,0,0); fbx.filter='none'; fb=fbl;
-                gbx.clearRect(0,0,gw,gh); gbx.filter='blur(0.4px)'; gbx.drawImage(gcv,0,0); gbx.filter='none'; gb=gbl; }
+    if(blurOK){ fbx.clearRect(0,0,gw,gh); fbx.filter='blur(0.9px)'; fbx.drawImage(fcv,0,0); fbx.filter='none'; fb=fbl;
+                gbx.clearRect(0,0,gw,gh); gbx.filter='blur(0.8px)'; gbx.drawImage(gcv,0,0); gbx.filter='none'; gb=gbl; }
     C.save(); C.globalCompositeOperation='multiply'; C.imageSmoothingEnabled=true; C.imageSmoothingQuality='high';
     C.drawImage(fb,-CELL,-CELL,gw*CELL,gh*CELL); C.restore();
     C.save(); C.imageSmoothingEnabled=true; C.imageSmoothingQuality='high'; C.drawImage(gb,-CELL,-CELL,gw*CELL,gh*CELL); C.restore();
+    C.drawImage(Ldots.c,0,0,W,H);
     C.drawImage(Lnames.c,0,0,W,H);
+    dotsInComp=dotsDrawn;
   }
   X.clearRect(0,0,W,H);
   X.drawImage(Lcomp.c,0,0,W,H);
+  if(dotsDrawn>dotsInComp) drawDots(X,dotsInComp,dotsDrawn);
+  /* the newest finds land as a ring of ink that closes onto its dot */
+  if(grow.length&&!reduced){
+    X.strokeStyle=rgba(DOTINK,1); X.lineWidth=1; var cnt=0;
+    for(var gi=grow.length-1;gi>=0&&cnt<160;gi--,cnt++){ var age=now-grow[gi].t; if(age>700||age<0) break; var kk=age/700;
+      X.globalAlpha=(1-kk)*0.75; X.beginPath(); X.arc(sx[grow[gi].i],sy[grow[gi].i],1.5+7*(1-kk)*(1-kk),0,TAU); X.stroke(); }
+    X.globalAlpha=1;
+  }
   /* the glyphs */
   var tt=now*0.001;
   for(var f=0;f<FEAT.length;f++){ var F=FEAT[f];
@@ -658,8 +730,9 @@ function frame(now){
   if(playing||living||grow.length){ if(!raf) raf=requestAnimationFrame(frame); }
 }
 function startPlay(){ if(uNow>=1){ uNow=0; setU(0); } playing=true; tPrev=0; body.classList.add('playing'); if(!raf) raf=requestAnimationFrame(frame); }
-function stopPlay(){ playing=false; intro=false; body.classList.remove('playing'); if(!finished&&uNow>=1){ finished=true; body.classList.add('done'); window.__done=true; } if(!reduced){ living=true; if(!raf) raf=requestAnimationFrame(frame); } }
-function interrupt(){ if(playing) stopPlay(); intro=false; body.classList.add('touched'); if(!reduced){ living=true; if(!raf) raf=requestAnimationFrame(frame); } }
+function goLive(){ if(reduced) return; if(!living){ living=true; liveT0=performance.now(); } if(!raf) raf=requestAnimationFrame(frame); }
+function stopPlay(){ playing=false; intro=false; body.classList.remove('playing'); if(!finished&&uNow>=1){ finished=true; body.classList.add('done'); window.__done=true; } goLive(); }
+function interrupt(){ if(playing) stopPlay(); intro=false; body.classList.add('touched'); goLive(); }
 $('play').addEventListener('click',function(){ body.classList.add('touched'); intro=false; if(playing) stopPlay(); else startPlay(); });
 rangeEl.addEventListener('input',function(){ interrupt(); setU(+rangeEl.value/2000,true); });
 document.addEventListener('keydown',function(e){
@@ -734,7 +807,9 @@ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(function(){ o
 
 /* ---------- go ---------- */
 window.__at=function(f){ var r=sceneEl.getBoundingClientRect(), F=FEAT[f]; return F?{x:r.left+F.x,y:r.top+F.y,vis:F.i<cursor,t:F.k,site:SITES[pS[F.i]],y0:pY0[F.i]}:null; };
-window.__probe=function(){ return {done:finished,playing:playing,living:living,year:Math.round(year),cursor:cursor,settled:settled,growing:grow.length,np:NP,fps:window.__fps,cell:CELL,gw:gw,gh:gh,feat:FEAT.length,hover:hover,W:W,H:H}; };
+window.__proj=function(lon,lat){ var r=sceneEl.getBoundingClientRect(), q=proj(lon,lat); return [r.left+q[0],r.top+q[1]]; };
+window.__probe=function(){ var vis=0; for(var f=0;f<FEAT.length;f++) if(FEAT[f].i<cursor) vis++; var byK={}; for(f=0;f<FEAT.length;f++) byK[FEAT[f].k]=(byK[FEAT[f].k]||0)+1;
+  return {done:finished,playing:playing,living:living,year:Math.round(year),cursor:cursor,settled:settled,growing:grow.length,np:NP,dots:dotsDrawn,fps:window.__fps,cell:CELL,gw:gw,gh:gh,feat:FEAT.length,featVis:vis,featByKind:byK,gsz:GSZ,hover:hover,W:W,H:H}; };
 relayout(); readouts();
 if(reduced){ intro=false; setU(1,true); settleAll(); finished=true; body.classList.add('done'); window.__done=true; schedule(); }
 else { setU(0); schedule(); setTimeout(function(){ if(intro&&!playing) startPlay(); },700); }

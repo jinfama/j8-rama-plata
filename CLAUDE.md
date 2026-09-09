@@ -5,8 +5,16 @@ Visor hermano de `web_latam` (mismo stack).
 ## Dónde se entra y dónde vive la aplicación  (2026-09-06)
 
 **`index.html` es la PORTADA**, no la aplicación: desde el 2026-09-08 (noche) es
-la V7 «el aceite se derrama» —una sola escena, sin histograma ni leyenda ni
-contadores—, con `<meta robots noindex>` y sus kits de datos en `portada/`
+la V7 «el aceite se derrama» —una sola escena, sin histograma ni contadores;
+retocada el 2026-09-09 (V7a) tras el veredicto de Juan («mantequilla / grasa»):
+el aceite es ahora virgen y translúcido (LUT oro → #b9b03a → oliva #6f7a1e
+multiplicada sobre el papel, opacidad ≤ 0,54, campo suavizado con dos pasadas
+binomiales antes de umbralizar, intro 11 s, en vivo respira y avanza de forma
+imperceptible), hay un punto de tinta por cada uno de los 8.405 hallazgos,
+~86 medallones en escritorio / ~29 en móvil de los seis tipos y una leyenda de
+una línea; backup de la V7 original en
+`C:/Work/scratch/checkpoint/visores_2026-09/web_minerva_backup/index.html.20260909-v7a.bak`—,
+con `<meta robots noindex>` y sus kits de datos en `portada/`
 (`minerva-ev6.js` + `minerva-ev6-sites.js`, generados por
 `build/portada_kit_v6.py`; `minerva-evidence.js` es el kit de la V5 y ya no se
 carga). Sus cinco enlaces entran cada uno por su figura:
