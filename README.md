@@ -21,10 +21,10 @@ con doble clic (`file://`). Ábrelo así:
 
 | Vista | Fuente | Contenido |
 |---|---|---|
-| **Atlas subnacional** | `D:/data/agriculture/olivar/01_tabular` | Superficie/producción/rendimiento a escala **provincial** (España 1860–2023, 51 prov.) y **municipal** (Andalucía **1580**–2010, 785 mun., desde el Catastro de Ensenada). Marca observado vs. estimado. |
+| **Atlas subnacional** | `ruta interna retirada` | Superficie/producción/rendimiento a escala **provincial** (España 1860–2023, 51 prov.) y **municipal** (Andalucía **1580**–2010, 785 mun., desde el Catastro de Ensenada). Marca observado vs. estimado. |
 | **Evidencia** | `.../olivar/02_evidence` | 10.456 registros arqueológicos georreferenciados (polen, ánforas, prensas, macrorrestos, textos, epigrafía, genética, isótopos, iconografía). Mapa por tipo + galería documentada con referencia y método de datación. |
-| **Tendencias mundiales** | `D:/data/whep_lab/whep_lab_balanced` | Coropleta animada mundial (1850–2024): superficie, producción, rendimiento y comercio directo de aceituna/aceite. |
-| **Flujos bilaterales** | `D:/data/trade/comtrade` (DB3) | Cintas exportador→importador de aceite de oliva y derivados, 1962–2024. |
+| **Tendencias mundiales** | `ruta interna retirada` | Coropleta animada mundial (1850–2024): superficie, producción, rendimiento y comercio directo de aceituna/aceite. |
+| **Flujos bilaterales** | `ruta interna retirada` (DB3) | Cintas exportador→importador de aceite de oliva y derivados, 1962–2024. |
 
 ## Stack
 HTML + CSS + módulos ES6 nativos (sin bundler). D3 v7 + topojson-client (CDN).
@@ -50,7 +50,7 @@ img/earth.png         textura del globo
 ```
 
 ## Regenerar los datos
-Requiere el Python global (`C:/Users/jinfa/AppData/Local/Programs/Python/Python312/python.exe`)
+Requiere el Python global (`ruta interna retirada`)
 con pandas/pyarrow/pycountry. Desde `build/`:
 ```
 python _names.py            # iso3 ↔ nombres Natural Earth  -> data/geo_names.json
